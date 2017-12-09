@@ -1,0 +1,33 @@
+[submodule "site/ciniki-mods/core"]
+	path = site/ciniki-mods/core
+	url = https://github.com/ciniki/core
+[submodule "site/ciniki-mods/users"]
+	path = site/ciniki-mods/users
+	url = https://github.com/ciniki/users
+[submodule "site/ciniki-mods/tenants"]
+	path = site/ciniki-mods/tenants
+	url = https://github.com/ciniki/tenants
+[submodule "site/ciniki-mods/cron"]
+	path = site/ciniki-mods/cron
+	url = https://github.com/ciniki/cron
+[submodule "site/ciniki-mods/bugs"]
+	path = site/ciniki-mods/bugs
+	url = https://github.com/ciniki/bugs
+[submodule "site/ciniki-mods/images"]
+	path = site/ciniki-mods/images
+	url = https://github.com/ciniki/images
+[submodule "site/qruqsp-mods/aprs"]
+	path = site/qruqsp-mods/aprs
+	url = https://github.com/qruqsp/aprs
+[submodule "site/qruqsp-mods/tnc"]
+	path = site/qruqsp-mods/tnc
+	url = https://github.com/qruqsp/tnc
+[submodule "site/qruqsp-mods/qsn"]
+	path = site/qruqsp-mods/qsn
+	url = https://github.com/qruqsp/qsn
+[submodule "site/qruqsp-mods/qsl"]
+	path = site/qruqsp-mods/qsl
+	url = https://github.com/qruqsp/qsl
+[submodule "site/qruqsp-mods/qrz"]
+	path = site/qruqsp-mods/qrz
+	url = https://github.com/qruqsp/qrz
