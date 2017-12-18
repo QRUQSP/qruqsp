@@ -31,3 +31,9 @@
 [submodule "site/qruqsp-mods/qrz"]
 	path = site/qruqsp-mods/qrz
 	url = https://github.com/qruqsp/qrz
+[submodule "site/ciniki-mods/web"]
+	path = site/ciniki-mods/web
+	url = https://github.com/ciniki/web
+[submodule "site/ciniki-mods/sysadmin"]
+	path = site/ciniki-mods/sysadmin
+	url = https://github.com/ciniki/sysadmin
