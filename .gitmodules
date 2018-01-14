@@ -37,3 +37,6 @@
 [submodule "site/ciniki-mods/sysadmin"]
 	path = site/ciniki-mods/sysadmin
 	url = https://github.com/ciniki/sysadmin
+[submodule "site/qruqsp-mods/qny"]
+	path = site/qruqsp-mods/qny
+	url = https://github.com/qruqsp/qny
