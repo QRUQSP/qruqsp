@@ -29,19 +29,134 @@ if( file_exists($ciniki_root . '/.htaccess') ) {
     exit();
 }
 
+/*
+-dh    $database_host = $args['database_host'];
+-du    $database_username = $args['database_username'];
+-dp    $database_password = $args['database_password'];
+-dn    $database_name = $args['database_name'];
+-ae    $admin_email = $args['admin_email'];
+-au    $admin_username = $args['admin_username'];
+-ap    $admin_password = $args['admin_password'];
+-af    $admin_firstname = $args['admin_firstname'];
+-al    $admin_lastname = $args['admin_lastname'];
+-ad    $admin_display_name = $args['admin_display_name'];
+-mn    $master_name = $args['master_name'];
+-se    $system_email = $args['system_email'];
+-sn    $system_email_name = $args['system_email_name'];
+-sc    $sync_code_url = preg_replace('/\/$/', '', $args['sync_code_url']);
+*/
+$valid_args = array(
+    '-dh' => array('field'=>'database_host', 'mandatory'=>'yes'),
+    '-du' => array('field'=>'database_username', 'mandatory'=>'yes'),
+    '-dp' => array('field'=>'database_password', 'mandatory'=>'no'),
+    '-dn' => array('field'=>'database_name', 'mandatory'=>'yes'),
+    '-ae' => array('field'=>'admin_email', 'mandatory'=>'yes'),
+    '-au' => array('field'=>'admin_username', 'mandatory'=>'yes'),
+    '-ap' => array('field'=>'admin_password', 'mandatory'=>'yes'),
+    '-af' => array('field'=>'admin_firstname', 'mandatory'=>'no'),
+    '-al' => array('field'=>'admin_lastname', 'mandatory'=>'no'),
+    '-ad' => array('field'=>'admin_display_name', 'mandatory'=>'no'),
+    '-mn' => array('field'=>'master_name', 'mandatory'=>'yes'),
+    '-se' => array('field'=>'system_email', 'mandatory'=>'no'),
+    '-sn' => array('field'=>'system_email_name', 'mandatory'=>'no'),
+    '-sc' => array('field'=>'sync_code_url', 'mandatory'=>'no'),
+    '-un' => array('field'=>'server_name', 'mandatory'=>'yes'),
+    '-ru' => array('field'=>'request_uri', 'mandatory'=>'no'),
+    '-80' => array('field'=>'disable_ssl', 'mandatory'=>'no'),
+    );
 //
-// If they didn't post anything, display the form, otherwise run an install
+// Check if running from command line, and display command line form
 //
-if( !isset($_POST['database_host']) ) {
-    print_page('yes', '', '');
-} else {
-    install($ciniki_root, $modules_dir);
+if( php_sapi_name() == 'cli' ) {
+    //
+    // Check for arguments
+    //
+    $args = array(
+        'database_host' => '',
+        'database_username' => '',
+        'database_password' => '',
+        'database_name' => '',
+        'admin_email' => '',
+        'admin_username' => '',
+        'admin_password' => '',
+        'admin_firstname' => '',
+        'admin_lastname' => '',
+        'admin_display_name' => '',
+        'master_name' => '',
+        'system_email' => '',
+        'system_email_name' => '',
+        'sync_code_url' => '',
+        'server_name' => '',
+        'request_uri' => '',
+        'http_host' => '',
+        );
+    //
+    // Grab the args into array
+    //
+    if( isset($argv[1]) && $argv[1] != '' ) {
+        array_shift($argv);
+    }
+    foreach($argv as $k => $arg) {
+        if( $arg == '-80' ) {
+            $args['disable_ssl'] = 'yes';
+        }
+        elseif( isset($valid_args[$arg]) ) {
+            $args[$valid_args[$arg]['field']] = $argv[($k+1)];
+        }
+    }
+
+    if( $args['admin_firstname'] == '' ) {  
+        $args['admin_firstname'] = $args['admin_username'];
+    }
+    if( $args['admin_display_name'] == '' ) {
+        $args['admin_display_name'] = $args['admin_username'];
+    }
+    if( $args['system_email'] == '' ) {  
+        $args['system_email'] = $args['admin_email'];
+    }
+    if( $args['system_email_name'] == '' ) {  
+        $args['system_email_name'] = $args['master_name'];
+    }
+    if( $args['http_host'] == '' ) {  
+        $args['http_host'] = $args['server_name'];
+    }
+  
+    $missing = '';
+    foreach($valid_args as $k => $arg) {
+        if( isset($arg['mandatory']) && $arg['mandatory'] == 'yes' && $args[$arg['field']] == '' ) {
+            $missing .= "Missing argument: {$k} {$arg['field']} \n";
+        }
+    }
+
+    if( $missing != '' ) {
+        print $missing;
+        exit;
+    }
+
+    $rc = install($ciniki_root, $modules_dir, $args);
+    if( $rc['err'] != 'install' ) {
+        print "Error: {$rc['err']} - {$rc['msg']}\n";
+    } else {
+        print "Installed\n";
+    }
+} 
+//
+// Running via web browser
+//
+else {
+    if( !isset($_POST['database_host']) ) {
+        print_page('yes', '', '');
+    } else {
+        $args = $_POST;
+        $args['server_name'] = $_SERVER['server_name'];
+        $args['request_uri'] = $_SERVER['request_uri'];
+        $args['http_host'] = $_SERVER['http_host'];
+        $rc = install($ciniki_root, $modules_dir, $args);
+        print_page($rc['form'], $rc['err'], $rc['msg']);
+    }
 }
 
 exit();
-
-
-
 
 
 function print_page($display_form, $err_code, $err_msg) {
@@ -1697,26 +1812,25 @@ table.list td div.calendar {
 <?php
 }
 
-
 //
 // Install Procedure
 //
-function install($ciniki_root, $modules_dir) {
+function install($ciniki_root, $modules_dir, $args) {
 
-    $database_host = $_POST['database_host'];
-    $database_username = $_POST['database_username'];
-    $database_password = $_POST['database_password'];
-    $database_name = $_POST['database_name'];
-    $admin_email = $_POST['admin_email'];
-    $admin_username = $_POST['admin_username'];
-    $admin_password = $_POST['admin_password'];
-    $admin_firstname = $_POST['admin_firstname'];
-    $admin_lastname = $_POST['admin_lastname'];
-    $admin_display_name = $_POST['admin_display_name'];
-    $master_name = $_POST['master_name'];
-    $system_email = $_POST['system_email'];
-    $system_email_name = $_POST['system_email_name'];
-    $sync_code_url = preg_replace('/\/$/', '', $_POST['sync_code_url']);
+    $database_host = $args['database_host'];
+    $database_username = $args['database_username'];
+    $database_password = $args['database_password'];
+    $database_name = $args['database_name'];
+    $admin_email = $args['admin_email'];
+    $admin_username = $args['admin_username'];
+    $admin_password = $args['admin_password'];
+    $admin_firstname = $args['admin_firstname'];
+    $admin_lastname = $args['admin_lastname'];
+    $admin_display_name = $args['admin_display_name'];
+    $master_name = $args['master_name'];
+    $system_email = $args['system_email'];
+    $system_email_name = $args['system_email_name'];
+    $sync_code_url = preg_replace('/\/$/', '', $args['sync_code_url']);
 
     $manage_api_key = md5(date('Y-m-d-H-i-s') . rand());
 
@@ -1745,6 +1859,8 @@ function install($ciniki_root, $modules_dir) {
 
     // The master tenantn ID will be set later on, once information is in database
     $config['ciniki.core']['master_tnid'] = 0;
+    $config['ciniki.core']['qruqsp_tnid'] = 0;
+
 
     $config['ciniki.core']['alerts.notify'] = $admin_email;
     $config['ciniki.core']['system.email'] = $system_email;
@@ -1755,18 +1871,18 @@ function install($ciniki_root, $modules_dir) {
 
     // Sync settings
     $config['ciniki.core']['sync.name'] = $master_name;
-    $config['ciniki.core']['sync.url'] = "https://" . $_SERVER['SERVER_NAME'] . "/" . preg_replace('/^\//', '', dirname($_SERVER['REQUEST_URI']) . "ciniki-sync.php");
+    $config['ciniki.core']['sync.url'] = "https://" . $args['server_name'] . "/" . preg_replace('/^\//', '', dirname($args['request_uri']) . "ciniki-sync.php");
     $config['ciniki.core']['sync.full.hour'] = "13";
     $config['ciniki.core']['sync.partial.hour'] = "13";
     $config['ciniki.core']['sync.code.url'] = $sync_code_url;
     $config['ciniki.core']['sync.log_lvl'] = 0;
     $config['ciniki.core']['sync.log_dir'] = dirname($ciniki_root) . "/logs";
     $config['ciniki.core']['sync.lock_dir'] = dirname($ciniki_root) . "/logs";
-    $config['ciniki.core']['manage.url'] = "https://" . $_SERVER['SERVER_NAME'] . "/" . preg_replace('/^\//', '', dirname($_SERVER['REQUEST_URI']) . "manager");
+    $config['ciniki.core']['manage.url'] = "https://" . $args['server_name'] . "/" . preg_replace('/^\//', '', dirname($args['request_uri']) . "manager");
 
     // Configure users module settings for password recovery
     $config['ciniki.users']['password.forgot.notify'] = $admin_email;
-    $config['ciniki.users']['password.forgot.url'] = "https://" . $_SERVER['SERVER_NAME'] . "/" . preg_replace('/^\/$/', '', dirname($_SERVER['REQUEST_URI']));
+    $config['ciniki.users']['password.forgot.url'] = "https://" . $args['server_name'] . "/" . preg_replace('/^\/$/', '', dirname($args['request_uri']));
 
     $config['ciniki.web'] = array();
     $config['ciniki.mail'] = array();
@@ -1784,13 +1900,11 @@ function install($ciniki_root, $modules_dir) {
     //
     if( !file_exists($ciniki_root . "/ciniki-mods/core") ) {
         if( $sync_code_url == '' ) {
-            print_page('yes', 'ciniki.installer.200', "Ciniki has not been downloaded, please specify a Code URL.");
-            exit();
+            return array('form'=>'yes', 'err'=>'ciniki.installer.200', 'msg'=>"Ciniki has not been downloaded, please check Code URL.}");
         }
         $remote_versions = file_get_contents($sync_code_url . '/_versions.ini');
         if( $remote_versions === false ) {
-            print_page('yes', 'ciniki.installer.201', "Unable to sync code, please check Code URL.");
-            exit();
+            return array('form'=>'yes', 'err'=>'ciniki.installer.201', 'msg'=>"Unable to sync code, please check Code URL.}");
         }
         $remote_modules = parse_ini_string($remote_versions, true);
         
@@ -1818,17 +1932,14 @@ function install($ciniki_root, $modules_dir) {
         foreach($remote_modules as $mod_name => $module) {
             $remote_zip = file_get_contents($sync_code_url . "/$mod_name.zip");
             if( $remote_zip === false ) {
-                print_page('yes', 'ciniki.installer.202', "Unable to get $mod_name.zip, please check Code URL.");
-                exit();
+                return array('form'=>'yes', 'err'=>'ciniki.installer.202', 'msg'=>"Unable to get {$mod_name}.zip, please check Code URL.}");
             }
             $zipfilename = $ciniki_root . "/ciniki-code/$mod_name.zip";
             if( ($bytes = file_put_contents($zipfilename, $remote_zip)) === false ) {
-                print_page('yes', 'ciniki.installer.203', "Unable to save $zipfilename");
-                exit();
+                return array('form'=>'yes', 'err'=>'ciniki.installer.203', 'msg'=>"Unable to save {$zipfilename}");
             }
             if( $bytes == 0 ) {
-                print_page('yes', 'ciniki.installer.204', "Unable to save $zipfilename");
-                exit();
+                return array('form'=>'yes', 'err'=>'ciniki.installer.204', 'msg'=>"Unable to open {$zipfilename}");
             }
             $zip = new ZipArchive;
             $res = $zip->open($zipfilename);
@@ -1841,8 +1952,7 @@ function install($ciniki_root, $modules_dir) {
                 $zip->extractTo($mod_dir);
                 $zip->close();
             } else {
-                print_page('yes', 'ciniki.installer.205', "Unable to open $mod_name.zip");
-                exit();
+                return array('form'=>'yes', 'err'=>'ciniki.installer.205', 'msg'=>"Unable to open {$mod_name}.zip");
             }
         }
     }
@@ -1854,8 +1964,7 @@ function install($ciniki_root, $modules_dir) {
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbInit');
     $rc = ciniki_core_dbInit($ciniki);
     if( $rc['stat'] != 'ok' ) {
-        print_page('yes', 'ciniki.' . $rc['err']['code'], "Failed to connect to the database '$database_name', please check your database connection settings and try again.<br/><br/>" . $rc['err']['msg']);
-        exit();
+        return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to to connect to the database, please check your connection settings and try again.<br/><br/>" . $rc['err']['msg']);
     }
 
     //
@@ -1865,8 +1974,7 @@ function install($ciniki_root, $modules_dir) {
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbUpgradeTables');
     $rc = ciniki_core_dbUpgradeTables($ciniki);
     if( $rc['stat'] != 'ok' ) {
-        print_page('yes', 'ciniki.' . $rc['err']['code'], "Failed to connect to the database '$database_name', please check your database connection settings and try again.<br/><br/>" . $rc['err']['msg']);
-        exit();
+        return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to to connect to the database, please check your connection settings and try again.<br/><br/>" . $rc['err']['msg']);
     }
 
     // FIXME: Add code to upgrade other packages databases
@@ -1879,12 +1987,10 @@ function install($ciniki_root, $modules_dir) {
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbCount');
     $rc = ciniki_core_dbCount($ciniki, $strsql, 'core', 'count');
     if( $rc['stat'] != 'ok' ) {
-        print_page('yes', 'ciniki.' . $rc['err']['code'], "Failed to check for existing data<br/><br/>" . $rc['err']['msg']);
-        exit();
+        return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to check for existing data<br/><br/>" . $rc['err']['msg']);
     }
     if( $rc['count']['num_rows'] != 0 ) {
-        print_page('yes', 'ciniki.installer.96', "Failed to check for existing data.");
-        exit();
+        return array('form'=>'yes', 'err'=>'ciniki.installer.220', 'msg'=>"Failed to check for existing data");
     }
     $db_exists = 'no';
 
@@ -1907,8 +2013,7 @@ function install($ciniki_root, $modules_dir) {
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbInsert');
     $rc = ciniki_core_dbTransactionStart($ciniki, 'core');
     if( $rc['stat'] != 'ok' ) {
-        print_page('yes', 'ciniki.' . $rc['err']['code'], "Failed to setup database<br/><br/>" . $rc['err']['msg']);
-        exit();
+        return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
     }
 
     if( $db_exists == 'no' ) {
@@ -1922,8 +2027,7 @@ function install($ciniki_root, $modules_dir) {
         $rc = ciniki_core_dbInsert($ciniki, $strsql, 'users');
         if( $rc['stat'] != 'ok' ) {
             ciniki_core_dbTransactionRollback($ciniki, 'core');
-            print_page('yes', 'ciniki.' . $rc['err']['code'], "Failed to setup database<br/><br/>" . $rc['err']['msg']);
-            exit();
+            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
         }
 
         //
@@ -1934,11 +2038,14 @@ function install($ciniki_root, $modules_dir) {
         $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
         if( $rc['stat'] != 'ok' ) {
             ciniki_core_dbTransactionRollback($ciniki, 'core');
-            print_page('yes', 'ciniki.' . $rc['err']['code'], "Failed to setup database<br/><br/>" . $rc['err']['msg']);
-            exit();
+            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
         }
         $config['ciniki.core']['master_tnid'] = 1;
-        $config['ciniki.web']['master.domain'] = $_SERVER['HTTP_HOST'];
+        $config['ciniki.core']['qruqsp_tnid'] = 1;
+        if( isset($args['disable_ssl']) && $args['disable_ssl'] == 'yes' ) {
+            $config['ciniki.core']['ssl'] = "'off'";
+        }
+        $config['ciniki.web']['master.domain'] = $args['http_host'];
         $config['ciniki.web']['poweredby.url'] = "http://ciniki.com/";
         $config['ciniki.web']['poweredby.name'] = "Ciniki";
         $config['ciniki.mail']['poweredby.url'] = "http://ciniki.com/";
@@ -1952,8 +2059,7 @@ function install($ciniki_root, $modules_dir) {
         $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
         if( $rc['stat'] != 'ok' ) {
             ciniki_core_dbTransactionRollback($ciniki, 'core');
-            print_page('yes', 'ciniki.' . $rc['err']['code'], "Failed to setup database<br/><br/>" . $rc['err']['msg']);
-            exit();
+            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
         }
 
         //
@@ -1964,17 +2070,68 @@ function install($ciniki_root, $modules_dir) {
         $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
         if( $rc['stat'] != 'ok' ) {
             ciniki_core_dbTransactionRollback($ciniki, 'core');
-            print_page('yes', 'ciniki.' . $rc['err']['code'], "Failed to setup database<br/><br/>" . $rc['err']['msg']);
-            exit();
+            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
+        }
+        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
+            . "VALUES ('1', 'ciniki', 'web', 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
+        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
+        if( $rc['stat'] != 'ok' ) {
+            ciniki_core_dbTransactionRollback($ciniki, 'core');
+            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
         }
 
-//        $strsql = "INSERT INTO ciniki_tenantn_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
+        //
+        // Enable the QRUQSP modules
+        //
+        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
+            . "VALUES ('1', 'qruqsp', 'aprs', 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
+        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
+        if( $rc['stat'] != 'ok' ) {
+            ciniki_core_dbTransactionRollback($ciniki, 'core');
+            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
+        }
+        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
+            . "VALUES ('1', 'qruqsp', 'tnc', 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
+        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
+        if( $rc['stat'] != 'ok' ) {
+            ciniki_core_dbTransactionRollback($ciniki, 'core');
+            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
+        }
+        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
+            . "VALUES ('1', 'qruqsp', 'qsn', 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
+        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
+        if( $rc['stat'] != 'ok' ) {
+            ciniki_core_dbTransactionRollback($ciniki, 'core');
+            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
+        }
+        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
+            . "VALUES ('1', 'qruqsp', 'qsl', 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
+        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
+        if( $rc['stat'] != 'ok' ) {
+            ciniki_core_dbTransactionRollback($ciniki, 'core');
+            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
+        }
+        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
+            . "VALUES ('1', 'qruqsp', 'qrz', 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
+        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
+        if( $rc['stat'] != 'ok' ) {
+            ciniki_core_dbTransactionRollback($ciniki, 'core');
+            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
+        }
+        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
+            . "VALUES ('1', 'qruqsp', 'qny', 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
+        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
+        if( $rc['stat'] != 'ok' ) {
+            ciniki_core_dbTransactionRollback($ciniki, 'core');
+            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
+        }
+
+//        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
 //            . "VALUES ('1', 'ciniki', 'questions', 1, 'all_customers', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
 //        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
 //        if( $rc['stat'] != 'ok' ) {
 //            ciniki_core_dbTransactionRollback($ciniki, 'core');
-//            print_page('yes', 'ciniki.' . $rc['err']['code'], "Failed to setup database<br/><br/>" . $rc['err']['msg']);
-//            exit();
+//            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
 //        }
 
         //
@@ -1985,8 +2142,7 @@ function install($ciniki_root, $modules_dir) {
         $rc = ciniki_core_dbInsert($ciniki, $strsql, 'bugs');
         if( $rc['stat'] != 'ok' ) {
             ciniki_core_dbTransactionRollback($ciniki, 'core');
-            print_page('yes', 'ciniki.' . $rc['err']['code'], "Failed to setup database<br/><br/>" . $rc['err']['msg']);
-            exit();
+            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
         }
 
 //        $strsql = "INSERT INTO ciniki_question_settings (tnid, detail_key, detail_value, date_added, last_updated) "
@@ -1994,8 +2150,7 @@ function install($ciniki_root, $modules_dir) {
 //        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'questions');
 //        if( $rc['stat'] != 'ok' ) {
 //            ciniki_core_dbTransactionRollback($ciniki, 'core');
-//            print_page('yes', 'ciniki.' . $rc['err']['code'], "Failed to setup database<br/><br/>" . $rc['err']['msg']);
-//            exit();
+//            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
 //        }
 
         //
@@ -2007,8 +2162,7 @@ function install($ciniki_root, $modules_dir) {
         $rc = ciniki_core_dbInsert($ciniki, $strsql, 'core');
         if( $rc['stat'] != 'ok' ) {
             ciniki_core_dbTransactionRollback($ciniki, 'core');
-            print_page('yes', 'ciniki.' . $rc['err']['code'], "Failed to setup database<br/><br/>" . $rc['err']['msg']);
-            exit();
+            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
         }
     }
 
@@ -2027,8 +2181,7 @@ function install($ciniki_root, $modules_dir) {
     if( $num_bytes == false || $num_bytes < strlen($new_config)) {
         unlink($ciniki_root . '/ciniki-api.ini');
         ciniki_core_dbTransactionRollback($ciniki, 'core');
-        print_page('yes', 'ciniki.installer.99', "Unable to write configuration, please check your website settings.");
-        exit();
+        return array('form'=>'yes', 'err'=>'ciniki.installer.99', 'msg'=>"Unable to write configuration, please check your website settings.");
     }
 
     //
@@ -2037,8 +2190,8 @@ function install($ciniki_root, $modules_dir) {
     $manage_config = ""
         . "[ciniki.core]\n"
         . "manage_root_url = /ciniki-mods\n"
-        . "themes_root_url = " . preg_replace('/^\/$/', '', dirname($_SERVER['REQUEST_URI'])) . "/ciniki-mods/core/ui/themes\n"
-        . "json_url = " . preg_replace('/^\/$/', '', dirname($_SERVER['REQUEST_URI'])) . "/ciniki-json.php\n"
+        . "themes_root_url = " . preg_replace('/^\/$/', '', dirname($args['request_uri'])) . "/ciniki-mods/core/ui/themes\n"
+        . "json_url = " . preg_replace('/^\/$/', '', dirname($args['request_uri'])) . "/ciniki-json.php\n"
         . "api_key = $manage_api_key\n"
         . "site_title = '" . $master_name . "'\n"
         . "";
@@ -2048,8 +2201,7 @@ function install($ciniki_root, $modules_dir) {
         unlink($ciniki_root . '/ciniki-api.ini');
         unlink($ciniki_root . '/ciniki-manage.ini');
         ciniki_core_dbTransactionRollback($ciniki, 'core');
-        print_page('yes', 'ciniki.installer.98', "Unable to write configuration, please check your website settings.");
-        exit();
+        return array('form'=>'yes', 'err'=>'ciniki.installer.98', 'msg'=>"Unable to write configuration, please check your website settings.");
     }
 
     //
@@ -2095,7 +2247,7 @@ function install($ciniki_root, $modules_dir) {
         . "RewriteRule ^(ciniki-mods/web/layouts/.*)$ $1 [L]                                    # Allow web-layouts content\n"
         . "RewriteRule ^(ciniki-mods/web/themes/.*)$ $1 [L]                                     # Allow web-themes content\n"
         . "RewriteRule ^(ciniki-mods/web/cache/.*\.(css|js|jpg|png|mp3|ogg|wav))$ $1 [L]                                      # Allow web-cache content\n"
-        . "RewriteRule ^(paypal-ipn|ciniki-login|ciniki-sync|ciniki-json|index|ciniki-manage).php$ $1.php [L]  # allow entrance php files\n"
+        . "RewriteRule ^(ciniki-login|ciniki-sync|ciniki-json|index|ciniki-manage).php$ $1.php [L]  # allow entrance php files\n"
         . "RewriteRule ^([_0-9a-zA-Z-]+/)(.*\.php)$ index.php [L]                                  # Redirect all other php requests to index\n"
         . "RewriteRule ^$ index.php [L]                                                              # Redirect all other requests to index\n"
         . "RewriteRule . index.php [L]                                                              # Redirect all other requests to index\n"
@@ -2116,8 +2268,7 @@ function install($ciniki_root, $modules_dir) {
         unlink($ciniki_root . '/ciniki-manage.ini');
         unlink($ciniki_root . '/.htaccess');
         ciniki_core_dbTransactionRollback($ciniki, 'core');
-        print_page('yes', 'ciniki.installer.97', "Unable to write configuration, please check your website settings.");
-        exit();
+        return array('form'=>'yes', 'err'=>'ciniki.installer.97', 'msg'=>"Unable to write configuration, please check your website settings.");
     }
 
     //
@@ -2125,7 +2276,6 @@ function install($ciniki_root, $modules_dir) {
     //
     symlink($ciniki_root . '/ciniki-mods/core/scripts/sync.php', $ciniki_root . '/ciniki-sync.php');
     symlink($ciniki_root . '/ciniki-mods/core/scripts/json.php', $ciniki_root . '/ciniki-json.php');
-    symlink($ciniki_root . '/ciniki-mods/core/scripts/paypal-ipn.php', $ciniki_root . '/paypal-ipn.php');
     symlink($ciniki_root . '/ciniki-mods/web/scripts/index.php', $ciniki_root . '/index.php');
     symlink($ciniki_root . '/ciniki-mods/core/scripts/manage.php', $ciniki_root . '/ciniki-manage.php');
     symlink($ciniki_root . '/ciniki-mods/core/scripts/login.php', $ciniki_root . '/ciniki-login.php');
@@ -2140,12 +2290,10 @@ function install($ciniki_root, $modules_dir) {
         unlink($ciniki_root . '/ciniki-manage.php');
         unlink($ciniki_root . '/ciniki-login.php');
         unlink($ciniki_root . '/index.php');
-        unlink($ciniki_root . '/paypal-ipn.php');
-        print_page('yes', 'ciniki.' . $rc['err']['code'], "Failed to setup database<br/><br/>" . $rc['err']['msg']);
-        exit();
+        return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
     }
 
-    print_page('no', 'installed', '');
+    return array('form'=>'no', 'err'=>'install', 'msg'=>'');
 }
 
 ?>
