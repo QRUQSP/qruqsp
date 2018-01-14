@@ -2241,7 +2241,7 @@ function install($ciniki_root, $modules_dir, $args) {
         . "RewriteCond %{REQUEST_FILENAME} -d\n"
         . "RewriteRule ^manager/(.*)$ ciniki-manage.php [L]                                            # allow all ciniki-manage\n"
         . "RewriteRule ^(manager)$ ciniki-manage.php [L]                                             # allow all ciniki-manage\n"
-        . "RewriteRule ^(ciniki-mods/[^\/]*/ui/.*)$ $1 [L]                                                  # Allow manage content\n"
+        . "RewriteRule ^([a-z]+-mods/[^\/]*/ui/.*)$ $1 [L]                                                  # Allow manage content\n"
 //        . "RewriteRule ^(ciniki-manage-themes/.*)$ $1 [L]                                           # Allow manage-theme content\n"
         . "RewriteRule ^(ciniki-web-themes/.*)$ $1 [L]                                              # Allow manage-theme content\n"
         . "RewriteRule ^(ciniki-mods/web/layouts/.*)$ $1 [L]                                    # Allow web-layouts content\n"
