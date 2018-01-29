@@ -148,9 +148,9 @@ else {
         print_page('yes', '', '');
     } else {
         $args = $_POST;
-        $args['server_name'] = $_SERVER['server_name'];
-        $args['request_uri'] = $_SERVER['request_uri'];
-        $args['http_host'] = $_SERVER['http_host'];
+        $args['server_name'] = $_SERVER['SERVER_NAME'];
+        $args['request_uri'] = $_SERVER['REQUEST_URI'];
+        $args['http_host'] = $_SERVER['HTTP_HOST'];
         $rc = install($ciniki_root, $modules_dir, $args);
         print_page($rc['form'], $rc['err'], $rc['msg']);
     }
