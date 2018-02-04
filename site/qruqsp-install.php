@@ -46,6 +46,7 @@ if( file_exists($ciniki_root . '/.htaccess') ) {
 -sc    $sync_code_url = preg_replace('/\/$/', '', $args['sync_code_url']);
 */
 $valid_args = array(
+    '-de' => array('field'=>'database_engine', 'mandatory'=>'no'),
     '-dh' => array('field'=>'database_host', 'mandatory'=>'yes'),
     '-du' => array('field'=>'database_username', 'mandatory'=>'yes'),
     '-dp' => array('field'=>'database_password', 'mandatory'=>'no'),
@@ -72,6 +73,7 @@ if( php_sapi_name() == 'cli' ) {
     // Check for arguments
     //
     $args = array(
+        'database_engine' => '',
         'database_host' => '',
         'database_username' => '',
         'database_password' => '',
@@ -1850,6 +1852,9 @@ function install($ciniki_root, $modules_dir, $args) {
     $config['ciniki.core']['session_timeout'] = 1800;
 
     // Database information
+    if( isset($args['database_engine']) && $args['database_engine'] != '' ) {
+        $config['ciniki.core']['database.engine'] = $args['database_engine'];
+    }
     $config['ciniki.core']['database'] = $database_name;
     $config['ciniki.core']['database.names'] = $database_name;
     $config['ciniki.core']["database.$database_name.hostname"] = $database_host;
@@ -1886,6 +1891,8 @@ function install($ciniki_root, $modules_dir, $args) {
 
     $config['ciniki.web'] = array();
     $config['ciniki.mail'] = array();
+
+
 
     //
     // Setup ciniki variable, just like ciniki-mods/core/private/init.php script, but we
