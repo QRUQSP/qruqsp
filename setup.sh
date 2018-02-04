@@ -128,6 +128,61 @@ do
   fi
 done
 
+echoAndLog "Now we will ask some questions to be used for setup later in the script..."
+# echo "Please enter database_host [localhost]: "
+# read database_host
+database_host="127.0.0.1"
+
+# echo "Please enter database_username [qruqsp]: "
+# read database_username
+database_username="qruqsp"
+
+# echo "Please enter database_name [qruqsp]: "
+# read database_name
+database_name="qruqsp"
+
+echo "Please enter admin_email: "
+read admin_email
+echoAndLog "admin_email=${admin_email}"
+
+echo "Please enter callsign"
+read callsign
+echoAndLog "callsign=${callsign}"
+
+# echo "Please enter admin_username: [callsign]"
+# read admin_username
+# We prefer admin_username normally be LOWERCASE of callsign
+admin_username=`echo ${callsign}|awk '{print tolower ($1)}'`
+echoAndLog "admin_username=${admin_username}"
+
+# echo "Please enter admin_password: "
+# read admin_password
+# FIXME: Create the random password or read it from my.cnf
+# For now we will use MAC addresses from the eth0 and wlan0 interfaces which is a total of 34 characters including the colons
+macs=`ifconfig -a | awk '/ether / {
+    gsub (":", "", $2)
+    printf ("%s", $2)
+}'`
+
+# Then add the CPU serial number
+admin_password=`/usr/bin/awk '/Serial/ {print $3 MACS}' MACS=${macs} /proc/cpuinfo`
+echoAndLog "admin_password=${admin_password}"
+
+# echo "Please enter master_name which is master tenant name: ["
+# read master_name
+# We prefer master_name normally be UPPERCASE of callsign because it looks better in the UI in all uppercase
+master_name=`echo ${callsign}|awk '{print toupper ($1)}'`
+echoAndLog "master_name=${master_name}"
+
+# This server_name is the part of the URL that is the hostname or IP address or however you get to it with DNS
+# For our testing on locahost this has always been set to qruqsp.local and we put an entry in /etc/hosts
+# echo "Please enter server_name: "
+#read server_name
+# The BEST OPTION is to use IP address from ifconfig so that it is easy to fix after DHCP gives a different IP address
+# We will use the first inet (IPv4 address) that is not 127.0.0.1 in case they have more than one ethernet interface 
+server_name=`ifconfig|awk '/inet / {if ($2 !~ "127.0.0.1") {print $2} }'|head -1`
+echoAndLog "server_name=${server_name}"
+
 echoAndLog "Checking if ssh is active and running..."
 /bin/systemctl status ssh
 sshActive=`/bin/systemctl status ssh | /usr/bin/awk '/Active/ {print $2}'`
@@ -469,6 +524,20 @@ else
     (cd /ciniki/src/rtl-sdr/build && ldconfig) | tee -a /ciniki/logs/qruqsp_setup.txt
 fi
 
+
+# git clone rtl_433
+if [ -d /ciniki/src/rtl_433/build ]
+then
+    echoAndLog "OK: It appears that we already did a build of rtl_433"
+else
+    git clone https://github.com/merbanan/rtl_433 /ciniki/src/rtl_433 | tee -a /ciniki/logs/qruqsp_setup.txt
+    mkdir -p /ciniki/src/rtl_433/build
+    (cd /ciniki/src/rtl_433/build && cmake ../) | tee -a /ciniki/logs/qruqsp_setup.txt
+    make -C /ciniki/src/rtl_433/build | tee -a /ciniki/logs/qruqsp_setup.txt
+    make -C /ciniki/src/rtl_433/build install | tee -a /ciniki/logs/qruqsp_setup.txt
+#    (cd /ciniki/src/rtl_433/build && ldconfig) | tee -a /ciniki/logs/qruqsp_setup.txt
+fi
+
 # Optional support for gpsd
 # This is covered in the separate document, Raspberry-Pi-APRS-Tracker.pdf.
 # https://github.com/wb2osz/direwolf/blob/master/doc/Raspberry-Pi-APRS-Tracker.pdf
@@ -481,6 +550,7 @@ apt-get -y install mysql-server | tee -a /ciniki/logs/qruqsp_setup.txt
 
 checkFiles /etc/mysql/my.cnf 
 
+# FIXME: This is may not be working correctly on ANdrew's Pi. Andrew has more than one sql_mode = entry in his my.cnf
 sqlMode=`egrep -c 'sql_mode\s+=\s+ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' /etc/mysql/my.cnf`
 if [ "${sqlMode}X" == "1X" ]
 then
@@ -499,11 +569,15 @@ fi
 if [ -f /home/pi/.my.cnf ]
 then
     echoAndLog "OK: /home/pi/.my.cnf exists"
+    # FIXME: read password from my.cnf and use it later in the script
 else
     echoAndLog "* Create /home/pi/.my.cnf with mysql user and password. This saves having to type the user and password for each mysql command."
     echo "[client]" > /home/pi/.my.cnf
     echo "user=root" >> /home/pi/.my.cnf
     echo "password=" >> /home/pi/.my.cnf
+    # FIXME: random password 32 characters
+    # FIXME: create admin user
+    # FIXME: mysql grant all on *.* to 'admin'@'localhost' identified by $password
 fi
 
 echoAndLog "Chown pi:pi /home/pi/.my.cnf and chmod 700 /home/pi/.my.cnf just in case it is not set correctly"
@@ -639,6 +713,14 @@ else
     echoAndLog "* FIXME: Turn on the password caching for git so you don't have to enter your github username/password everytime you push. Example usage below:"
     echoAndLog "    git config --global credential.helper cache"
 fi
+
+# php /ciniki/sites/qruqsp.local/site/qruqsp-install.php
+# FIXME: PHP Warning:  mysqli_connect(): (HY000/1698): Access denied for user 'qruqsp'@'localhost' in /ciniki/sites/qruqsp.local/site/ciniki-mods/core/private/dbConnect.php on line 71
+# FIXME  Error: ciniki.ciniki.core.33 - Failed to to connect to the database, please check your connection settings and try again.<br/><br/>Database error
+php /ciniki/sites/qruqsp.local/site/qruqsp-install.php -dh ${database_host} -du ${database_username} -dn ${database_name} -ae ${admin_email} -au ${admin_username} -ap ${admin_password} -mn ${master_name} -un {server_name} | tee -a /ciniki/logs/qruqsp_setup.txt
+# if I need to rerun:
+# mysqladmin drop qruqsp
+# rm -rf /ciniki/sites/qruqsp.local
 
 # Print any to do items here if we loaded them into this TODO variable earlier in the script. This is the last thing we want the user to see before END.
 TODOS=`echo ${TODO} | grep -c TODO`
