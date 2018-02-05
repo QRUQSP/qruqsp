@@ -318,7 +318,7 @@ apt-get -y install libasound2-dev | tee -a /ciniki/logs/qruqsp_setup.txt
 echoAndLog "Download Dire Wolf source code from github"
 # Follow these steps to clone the git repository and checkout the desired version.
 # cd ~
-for needDir in /ciniki/logs /ciniki/bin /ciniki/db/mysql /ciniki/src/direwolf /ciniki/src/hamlib /ciniki/sites /ciniki/sites/qruqsp.local/logs
+for needDir in /ciniki/logs /ciniki/bin /ciniki/db/mysql /ciniki/src/direwolf /ciniki/src/hamlib /ciniki/sites /ciniki/apache-sites-enabled
 do
     if [ -d ${needDir} ]
     then
@@ -330,6 +330,7 @@ do
         chmod 2755 -R ${needDir}
     fi
 done
+
 if [ -f /ciniki/src/direwolf/Makefile ]
 then
     echoAndLog "It looks like we have already pulled direwolf from github"
@@ -618,6 +619,19 @@ else
     git clone https://github.com/qruqsp/qruqsp /ciniki/sites/qruqsp.local | tee -a /ciniki/logs/qruqsp_setup.txt
 fi
 
+for needDir in /ciniki/sites/qruqsp.local/logs
+do
+    if [ -d ${needDir} ]
+    then
+        echoAndLog "OK: Folder exists: ${needDir}"
+    else
+        echoAndLog "* Creating Folder: ${needDir}"
+        mkdir -p ${needDir}
+        chown pi:pi ${needDir}
+        chmod 2755 -R ${needDir}
+    fi
+done
+
 # We always want to git pull and git submodule update so that we have the latest updates to the qruqsp code
 echoAndLog "* git pull"
 git pull /ciniki/sites/qruqsp.local | tee -a /ciniki/logs/qruqsp_setup.txt
@@ -627,12 +641,14 @@ git submodule update /ciniki/sites/qruqsp.local | tee -a /ciniki/logs/qruqsp_set
 echoAndLog "* Make sure we have updated qruqsp code using git submodule update --init"
 (cd /ciniki/sites/qruqsp.local && git submodule update --init) | tee -a /ciniki/logs/qruqsp_setup.txt
 
-if [ -f /etc/apache2/sites-available/qruqsp.local.conf ]
+# FIXED: This should be in /ciniki/sites/qruqsp.local/apache.conf
+# if [ -f /etc/apache2/sites-available/qruqsp.local.conf ]
+if [ -f /ciniki/sites/qruqsp.local/apache.conf ]
 then
-    echoAndLog "OK: /etc/apache2/sites-available/qruqsp.local.conf exists"
+    echoAndLog "OK: /ciniki/sites/qruqsp.local/apache.conf exists"
 else
-    echoAndLog "* Create /etc/apache2/sites-available/qruqsp.local.conf"
-    cat > /etc/apache2/sites-available/qruqsp.local.conf <<EOL
+    echoAndLog "* Create /ciniki/sites/qruqsp.local/apache.conf"
+    cat > /ciniki/sites/qruqsp.local/apache.conf <<EOL
 <VirtualHost *:80>
     DocumentRoot /ciniki/sites/qruqsp.local/site
     <Directory />
@@ -649,13 +665,37 @@ else
     CustomLog /ciniki/sites/qruqsp.local/logs/access.log combined
 </VirtualHost>
 EOL
-    echoAndLog "Link /etc/apache2/sites-enabled/qruqsp.local.conf and /etc/apache2/mods-enabled/rewrite.load"
-    ln -s /etc/apache2/sites-available/qruqsp.local.conf /etc/apache2/sites-enabled/qruqsp.local.conf
-    ls -l /etc/apache2/sites-available/qruqsp.local.conf /etc/apache2/sites-enabled/qruqsp.local.conf | tee -a /ciniki/logs/qruqsp_setup.txt
-    echoAndLog "Link /etc/apache2/mods-available/rewrite.load and /etc/apache2/mods-enabled/rewrite.load"
-    ln -s /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rewrite.load
-    ls -l /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rewrite.load | tee -a /ciniki/logs/qruqsp_setup.txt
 fi
+
+if [ -s /ciniki/apache-sites-enabled/qruqsp.local.conf ]
+then
+    echoAndLog "OK: /ciniki/apache-sites-enabled/qruqsp.local.conf symbolic link exists"
+else
+    echoAndLog "* Create symbolic link /ciniki/apache-sites-enabled/qruqsp.local.conf /ciniki/sites/qruqsp.local/apache.conf"
+    ln -s /ciniki/sites/qruqsp.local/apache.conf /ciniki/apache-sites-enabled/qruqsp.local.conf 
+fi
+
+APINC=`egrep -c "IncludeOptional /ciniki/apache-sites-enabled/\*.conf" /etc/apache2/apache2.conf`
+if [ "${APINC}X" == "1X" ]
+then
+    echoAndLog "OK: /etc/apache2/apache2.conf already includes: IncludeOptional /ciniki/apache-sites-enabled/*.conf"
+else
+    echoAndLog "*Add: IncludeOptional /ciniki/apache-sites-enabled/*.conf to /etc/apache2/apache2.conf"
+    echo "IncludeOptional /ciniki/apache-sites-enabled/*.conf" >> /etc/apache2/apache2.conf
+fi
+
+# FIXED: THis should be a2enmod rewrite instead of creating the link
+#    echoAndLog "Link /etc/apache2/sites-enabled/qruqsp.local.conf and /etc/apache2/mods-enabled/rewrite.load"
+#    ln -s /etc/apache2/sites-available/qruqsp.local.conf /etc/apache2/sites-enabled/qruqsp.local.conf
+#    ls -l /etc/apache2/sites-available/qruqsp.local.conf /etc/apache2/sites-enabled/qruqsp.local.conf | tee -a /ciniki/logs/qruqsp_setup.txt
+#    echoAndLog "Link /etc/apache2/mods-available/rewrite.load and /etc/apache2/mods-enabled/rewrite.load"
+#    ln -s /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rewrite.load
+#    ls -l /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rewrite.load | tee -a /ciniki/logs/qruqsp_setup.txt
+#fi
+# FIXED: Below does the same as above in a better way
+echoAndLog "Make sure mod_rewrite is enabled"
+# Result should be "Module rewrite already enabled"
+a2enmod rewrite | tee -a /ciniki/logs/qruqsp_setup.txt
 
 APACHE_RUN_USER=`awk -F '=' '/APACHE_RUN_USER/ {print $2}' /etc/apache2/envvars`
 APACHE_RUN_GROUP=`awk -F '=' '/APACHE_RUN_GROUP/ {print $2}' /etc/apache2/envvars`
@@ -694,17 +734,9 @@ else
     fi
 fi
 
-if [ -f /ciniki/sites/qruqsp.local/dev-tools/run.ini.default ]
+if [ -d /ciniki/sites/qruqsp.local/site ]
 then
-    echoAndLog "OK: it looks like we already did a git clone dev-tools.git"
-else
-    echoAndLog "* git clone dev-tools.git"
-    git clone https://github.com/qruqsp/dev-tools.git /ciniki/sites/qruqsp.local/dev-tools | tee -a /ciniki/logs/qruqsp_setup.txt
-fi
-
-if [ -f /ciniki/sites/qruqsp.local/run.ini ]
-then
-    echoAndLog "OK: /ciniki/sites/qruqsp.local/run.ini exists"
+    echoAndLog "OK: /ciniki/sites/qruqsp.local/.git exists"
 else
     echoAndLog "* FIXME: Do we want to automate the steps below and if so what values should be entered in run.ini?"
     echoAndLog "* WARNING: /ciniki/sites/qruqsp.local/run.ini does not exist"
@@ -717,10 +749,35 @@ fi
 # php /ciniki/sites/qruqsp.local/site/qruqsp-install.php
 # FIXME: PHP Warning:  mysqli_connect(): (HY000/1698): Access denied for user 'qruqsp'@'localhost' in /ciniki/sites/qruqsp.local/site/ciniki-mods/core/private/dbConnect.php on line 71
 # FIXME  Error: ciniki.ciniki.core.33 - Failed to to connect to the database, please check your connection settings and try again.<br/><br/>Database error
-php /ciniki/sites/qruqsp.local/site/qruqsp-install.php -dh ${database_host} -du ${database_username} -dn ${database_name} -ae ${admin_email} -au ${admin_username} -ap ${admin_password} -mn ${master_name} -un {server_name} | tee -a /ciniki/logs/qruqsp_setup.txt
+# FIXME -de Aria on maria 10.1 or 10.0 and not incldued otherwise
+MYSQLVER=`mysql --version | awk '{print substr ($0, index ($0, "Distrib")+8, 4)  }'`
+if [ "$MYSQLVER}X" == "10.0X" ] || [ "$MYSQLVER}X" == "10.1X" ]
+then
+    DBENG="-de Aria"
+    echoAndLog "WARNING: Aria Database Engine will be used as a work-around to MariaDB version ${MYSQLVER}"
+else
+    echoAndLog "OK: MySQL version is ${MYSQLVER} and threfore the Aria Database Engine will be InnoBB as preferred. The work-around for MariaDB versions 10.1 and 10.2 are not required."
+fi
+
+php /ciniki/sites/qruqsp.local/site/qruqsp-install.php ${DBENG} -dh ${database_host} -du ${database_username} -dn ${database_name} -ae ${admin_email} -au ${admin_username} -ap ${admin_password} -mn ${master_name} -un {server_name} | tee -a /ciniki/logs/qruqsp_setup.txt
+
 # if I need to rerun:
 # mysqladmin drop qruqsp
 # rm -rf /ciniki/sites/qruqsp.local
+
+CINIKICRONS=`crontab -l | egrep -c "/ciniki/sites/ciniki.com/site/ciniki-mods/cron/scripts/cron.php"`
+if [ "${CINIKICRONS}X" == "3X" ]
+then
+    echoAndLog "OK: root crontab already includes ${CINIKICRONS} ciniki cron.php entries"
+else
+    echoAndLog "*Adding root crontab entries for ciniki cron.php"
+    crontab -l > /tmp/cinikirootcron
+    echo "*/5 * * * * sudo -u www-data /usr/bin/php /ciniki/sites/ciniki.com/site/ciniki-mods/cron/scripts/cron.php >>/ciniki/sites/ciniki.com/logs/cron.log 2>&1" >> /tmp/cinikirootcron
+    echo "*/5 * * * * sudo -u www-data /usr/bin/php /ciniki/sites/ciniki.com/site/ciniki-mods/cron/scripts/cron.php ciniki.mail >>/ciniki/sites/ciniki.com/logs/cron.log 2>&1" >> /tmp/cinikirootcron
+    echo "*/5 * * * * sudo -u www-data /usr/bin/php /ciniki/sites/ciniki.com/site/ciniki-mods/cron/scripts/cron.php -ignore ciniki.mail >>/ciniki/sites/ciniki.com/logs/cron.log 2>&1" >> /tmp/cinikirootcron
+    crontab /tmp/cinikirootcron
+    rm /tmp/cinikirootcron
+fi
 
 # Print any to do items here if we loaded them into this TODO variable earlier in the script. This is the last thing we want the user to see before END.
 TODOS=`echo ${TODO} | grep -c TODO`
