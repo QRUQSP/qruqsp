@@ -779,6 +779,9 @@ else
     rm /tmp/cinikirootcron
 fi
 
+echoAndLog "Install lshw if not installed already"
+apt-get -y install lshw
+
 # Print any to do items here if we loaded them into this TODO variable earlier in the script. This is the last thing we want the user to see before END.
 TODOS=`echo ${TODO} | grep -c TODO`
 if [ "${TODOS}X" != "0X" ]
