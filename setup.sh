@@ -135,7 +135,7 @@ database_host="127.0.0.1"
 
 # echo "Please enter database_username [qruqsp]: "
 # read database_username
-database_username="qruqsp"
+database_username="admin"
 
 # echo "Please enter database_name [qruqsp]: "
 # read database_name
@@ -148,6 +148,22 @@ echoAndLog "admin_email=${admin_email}"
 echo "Please enter callsign"
 read callsign
 echoAndLog "callsign=${callsign}"
+
+echo "Please enter your preferred password for ${callsign}"
+read -s qruqsp_password
+
+echo
+echo "Please enter your preferred password for ${callsign} AGAIN"
+read -s again_qruqsp_password 
+echo
+
+if [ "${qruqsp_password}X" == "${again_qruqsp_password}X" ]
+then
+    echoAndLog "OK: Passwords match"
+else
+    echoAndLog "FATAL: Passwords do not match please run again ${0}"
+    exit 1
+fi
 
 # echo "Please enter admin_username: [callsign]"
 # read admin_username
@@ -549,7 +565,7 @@ echoAndLog "After going through all of these steps, you might want to make a bac
 echoAndLog "Installing mysql-server if not already installed"
 apt-get -y install mysql-server | tee -a /ciniki/logs/qruqsp_setup.txt
 
-checkFiles /etc/mysql/my.cnf 
+checkFiles /etc/mysql/my.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
 
 # FIXME: This is may not be working correctly on ANdrew's Pi. Andrew has more than one sql_mode = entry in his my.cnf
 sqlMode=`egrep -c 'sql_mode\s+=\s+ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' /etc/mysql/my.cnf`
@@ -574,8 +590,8 @@ then
 else
     echoAndLog "* Create /home/pi/.my.cnf with mysql user and password. This saves having to type the user and password for each mysql command."
     echo "[client]" > /home/pi/.my.cnf
-    echo "user=root" >> /home/pi/.my.cnf
-    echo "password=" >> /home/pi/.my.cnf
+    echo "user=admin" >> /home/pi/.my.cnf
+    echo "password=${admin_password}" >> /home/pi/.my.cnf
     # FIXME: random password 32 characters
     # FIXME: create admin user
     # FIXME: mysql grant all on *.* to 'admin'@'localhost' identified by $password
@@ -585,6 +601,56 @@ echoAndLog "Chown pi:pi /home/pi/.my.cnf and chmod 700 /home/pi/.my.cnf just in 
 chown pi:pi /home/pi/.my.cnf | tee -a /ciniki/logs/qruqsp_setup.txt
 chmod 700 /home/pi/.my.cnf | tee -a /ciniki/logs/qruqsp_setup.txt
 echoAndLog "FIXME: It seems that Raspbian stretch switched from mysql to MariaDB and /home/pi/.my.cnf no longer works as it did with mysql. We wil have to run mysql commands as root nutil we figure this out."
+# check that innodb_* and sql_mode settings have been added to /etc/mysql/mariadb.conf.d/50-server.cnf
+innodbOptions=`egrep -c 'default-character-set = latin1|innodb_large_prefix = 1|innodb_file_format = barracuda|innodb_file_format_max = barracuda|innodb_file_per_table = 1|character-set-server = latin1|collation-server = latin1_general_ci|default-character-set = latin1' /etc/mysql/mariadb.conf.d/51-ciniki.cnf`
+if [ "${innodbOptions}X" == "8X" ]
+then
+    echoAndLog "OK: /etc/mysql/mariadb.conf.d/51-ciniki.cnf contains ${innodbOptions} of 8 of the innodb_* and sql_mode settings that are required."
+else
+    echoAndLog "*** UNEXPECTED: /etc/mysql/mariadb.conf.d/51-ciniki.cnf CONTAINS ONLY ${innodbOptions} of 8 of the innodb_* and sql_mode settings that are required."
+    TODO="${TODO}\n *** UNEXPECTED: /etc/mysql/mariadb.conf.d/51-ciniki.cnf CONTAINS ONLY ${innodbOptions} of 8 of the innodb_* and sql_mode settings that are required."
+    echoAndLog "*** Deleting and recreating /etc/mysql/mariadb.conf.d/51-ciniki.cnf"
+    rm /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+#     datetime=`date "+%Y-%m-%d_%H%M%S"`
+#     echoAndLog "* Making a backup of /etc/mysql/mariadb.conf.d/50-server.cnf into /etc/mysql/50-server.cnf.backup-${datetime}"
+#     cp -p /etc/mysql/mariadb.conf.d/50-server.cnf /etc/mysql/50-server.cnf.backup-${datetime}
+#     echoAndLog "* Update /etc/mysql/mariadb.conf.d/50-server.cnf with the innodb_* and sql_mode settings that are required."
+#     awk '{gsub FIXME 
+#     echo " " > /tmp/mysql_conf_ending
+#     echo "[mysqld]" >> /tmp/mysql_conf_ending
+#     echo "sql_mode = ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION" >> /tmp/mysql_conf_ending
+#     cat /etc/mysql/my.cnf.backup-${datetime} /tmp/mysql_conf_ending > /etc/mysql/my.cnf
+fi
+
+# check that innodb_* and sql_mode settings have been added to /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+if [ -f /etc/mysql/mariadb.conf.d/51-ciniki.cnf ]
+then
+    echoAndLog "OK: /etc/mysql/mariadb.conf.d/51-ciniki.cnf exists"
+else
+    echo "# DO NOT TOUCH THIS FILE because it is auto-generated" > /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+    echo "# These options are required to work-around InnoDB MariaDB 10.1" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+    echo "[mysql]" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+    echo "default-character-set = latin1" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+    echo "" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+    echo "[mysqld]" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+    echo "" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+    echo "#" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+    echo "# Additional settings for Ciniki and qruqsp" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+    echo "#" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+    echo "innodb_large_prefix = 1" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+    echo "innodb_file_format = barracuda" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+    echo "innodb_file_format_max = barracuda" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+    echo "innodb_file_per_table = 1" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+    echo "# sql_mode = \"NO_ENGINE_SUBSTITUTION\"" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+    echo "character-set-server = latin1" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+    echo "collation-server = latin1_general_ci" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+    echo "" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+    echo "[client]" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+    echo "default-character-set = latin1" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+fi
+
+
+
 
 echoAndLog "Checking for qruqsp database..."
 if [ `mysqlshow qruqsp | grep -c 'Database: qruqsp'` == "1" ]
@@ -760,7 +826,7 @@ else
     echoAndLog "OK: MySQL version is ${MYSQLVER} and threfore the Aria Database Engine will be InnoBB as preferred. The work-around for MariaDB versions 10.1 and 10.2 are not required."
 fi
 
-php /ciniki/sites/qruqsp.local/site/qruqsp-install.php ${DBENG} -dh ${database_host} -du ${database_username} -dn ${database_name} -ae ${admin_email} -au ${admin_username} -ap ${admin_password} -mn ${master_name} -un {server_name} | tee -a /ciniki/logs/qruqsp_setup.txt
+php /ciniki/sites/qruqsp.local/site/qruqsp-install.php ${DBENG} -dh ${database_host} -du ${database_username} -dp ${admin_password} -dn ${database_name} -ae ${admin_email} -au ${admin_username} -ap ${qruqsp_password} -mn ${master_name} -un {server_name} | tee -a /ciniki/logs/qruqsp_setup.txt
 
 # if I need to rerun:
 # mysqladmin drop qruqsp
