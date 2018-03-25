@@ -703,10 +703,10 @@ done
 echoAndLog "* git pull"
 git pull /ciniki/sites/qruqsp.local | tee -a /ciniki/logs/qruqsp_setup.txt
 echoAndLog "* git submodule update"
-git submodule update /ciniki/sites/qruqsp.local | tee -a /ciniki/logs/qruqsp_setup.txt
+git submodule update --init /ciniki/sites/qruqsp.local | tee -a /ciniki/logs/qruqsp_setup.txt
 
-echoAndLog "* Make sure we have updated qruqsp code using git submodule update --init"
-(cd /ciniki/sites/qruqsp.local && git submodule update --init) | tee -a /ciniki/logs/qruqsp_setup.txt
+# echoAndLog "* Make sure we have updated qruqsp code using git submodule update --init"
+# (cd /ciniki/sites/qruqsp.local && git submodule update --init) | tee -a /ciniki/logs/qruqsp_setup.txt
 
 # FIXED: This should be in /ciniki/sites/qruqsp.local/apache.conf
 # if [ -f /etc/apache2/sites-available/qruqsp.local.conf ]
