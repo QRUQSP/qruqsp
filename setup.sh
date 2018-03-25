@@ -650,7 +650,14 @@ else
 fi
 
 
-
+echoAndLog "Checking for database admin user..."
+if [ `mysql --user root -sse 'SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = "admin")' mysql` == "1" ]
+then
+    echoAndLog "OK: database admin exists"
+else
+    echoAndLog "* Create database admin user because it does not already exist"
+    mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'admin'@'localhost' IDENTIFIED BY '${admin_password}';" mysql
+fi
 
 echoAndLog "Checking for qruqsp database..."
 if [ `mysqlshow qruqsp | grep -c 'Database: qruqsp'` == "1" ]
@@ -659,7 +666,7 @@ then
 else
     echoAndLog "* Create qruqsp database because it does not already exist"
     mysqladmin create qruqsp | tee -a /ciniki/logs/qruqsp_setup.txt
-    mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'admin'@'localhost' IDENTIFIED BY password '${admin_password}';" mysql
+#    mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'admin'@'localhost' IDENTIFIED BY password '${admin_password}';" mysql
 fi
 echoAndLog "Install Apache and PHP if not already installed"
 apt-get -y install apache2 php7.0-xml php7.0-imagick php7.0-intl php7.0-curl php7.0-mysql php7.0-json php7.0-readline php7.0-imap libapache2-mod-php7.0 | tee -a /ciniki/logs/qruqsp_setup.txt
@@ -716,7 +723,8 @@ then
 else
     echoAndLog "* Create /ciniki/sites/qruqsp.local/apache.conf"
     cat > /ciniki/sites/qruqsp.local/apache.conf <<EOL
-<VirtualHost *:80>
+LISTEN 8080
+<VirtualHost *:8080>
     DocumentRoot /ciniki/sites/qruqsp.local/site
     <Directory />
         Options FollowSymLinks
