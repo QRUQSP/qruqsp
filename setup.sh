@@ -847,9 +847,8 @@ then
 else
     echoAndLog "*Adding root crontab entries for ciniki cron.php"
     crontab -l > /tmp/cinikirootcron
-    echo "*/5 * * * * sudo -u www-data /usr/bin/php /ciniki/sites/ciniki.com/site/ciniki-mods/cron/scripts/cron.php >>/ciniki/sites/ciniki.com/logs/cron.log 2>&1" >> /tmp/cinikirootcron
-    echo "*/5 * * * * sudo -u www-data /usr/bin/php /ciniki/sites/ciniki.com/site/ciniki-mods/cron/scripts/cron.php ciniki.mail >>/ciniki/sites/ciniki.com/logs/cron.log 2>&1" >> /tmp/cinikirootcron
-    echo "*/5 * * * * sudo -u www-data /usr/bin/php /ciniki/sites/ciniki.com/site/ciniki-mods/cron/scripts/cron.php -ignore ciniki.mail >>/ciniki/sites/ciniki.com/logs/cron.log 2>&1" >> /tmp/cinikirootcron
+    echo "*/5 * * * * sudo -u www-data /usr/bin/php /ciniki/sites/qruqsp.local/site/ciniki-mods/cron/scripts/cron.php ciniki.mail >>/ciniki/sites/qruqsp.local/logs/cron.log 2>&1" >> /tmp/cinikirootcron
+    echo "*/5 * * * * sudo -u www-data /usr/bin/php /ciniki/sites/qruqsp.local/site/ciniki-mods/cron/scripts/cron.php -ignore ciniki.mail >>/ciniki/sites/qruqsp.local/logs/cron.log 2>&1" >> /tmp/cinikirootcron
     crontab /tmp/cinikirootcron
     rm /tmp/cinikirootcron
 fi
