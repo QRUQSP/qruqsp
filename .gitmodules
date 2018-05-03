@@ -40,3 +40,6 @@
 [submodule "site/qruqsp-mods/43392"]
 	path = site/qruqsp-mods/43392
 	url = https://github.com/qruqsp/43392
+[submodule "site/qruqsp-mods/core"]
+	path = site/qruqsp-mods/core
+	url = https://github.com/qruqsp/core
