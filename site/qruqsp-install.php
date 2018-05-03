@@ -2212,6 +2212,8 @@ function install($ciniki_root, $modules_dir, $args) {
         . "json_url = " . preg_replace('/^\/$/', '', dirname($args['request_uri'])) . "/ciniki-json.php\n"
         . "api_key = $manage_api_key\n"
         . "site_title = '" . $master_name . "'\n"
+        . "help.mode = online\n"
+        . "help.url = https://qruqsp.org/\n"
         . "";
 
     $num_bytes = file_put_contents($ciniki_root . '/ciniki-manage.ini', $manage_config);
