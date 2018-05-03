@@ -1848,8 +1848,8 @@ function install($ciniki_root, $modules_dir, $args) {
     $config['ciniki.core']['cache_dir'] = $ciniki_root . '/ciniki-cache';
     $config['ciniki.core']['backup_dir'] = $ciniki_root . '/ciniki-backups';
 
-    // Default session timeout to 30 minutes
-    $config['ciniki.core']['session_timeout'] = 1800;
+    // Default session timeout to 7 days 
+    $config['ciniki.core']['session_timeout'] = 604800;
 
     // Database information
     if( isset($args['database_engine']) && $args['database_engine'] != '' ) {
@@ -1891,6 +1891,10 @@ function install($ciniki_root, $modules_dir, $args) {
 
     $config['ciniki.web'] = array();
     $config['ciniki.mail'] = array();
+
+    $config['qruqsp.core'] = array();
+    $config['qruqsp.core']['log_dir'] = dirname($root_dir) . '/logs';
+    $config['qruqsp.43392'] = array();
 
 
 
@@ -2072,7 +2076,7 @@ function install($ciniki_root, $modules_dir, $args) {
         //
         // Enable modules: bugs, questions for master tenant
         //
-        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
+/*        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
             . "VALUES ('1', 'ciniki', 'bugs', 1, 'all_customers', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
         $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
         if( $rc['stat'] != 'ok' ) {
@@ -2085,19 +2089,19 @@ function install($ciniki_root, $modules_dir, $args) {
         if( $rc['stat'] != 'ok' ) {
             ciniki_core_dbTransactionRollback($ciniki, 'core');
             return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
-        }
+        } */
 
         //
         // Enable the QRUQSP modules
         //
-        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
+/*        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
             . "VALUES ('1', 'qruqsp', 'aprs', 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
         $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
         if( $rc['stat'] != 'ok' ) {
             ciniki_core_dbTransactionRollback($ciniki, 'core');
             return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
-        }
-        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
+        } */
+/*        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
             . "VALUES ('1', 'qruqsp', 'tnc', 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
         $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
         if( $rc['stat'] != 'ok' ) {
@@ -2124,9 +2128,16 @@ function install($ciniki_root, $modules_dir, $args) {
         if( $rc['stat'] != 'ok' ) {
             ciniki_core_dbTransactionRollback($ciniki, 'core');
             return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
-        }
+        } 
         $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
             . "VALUES ('1', 'qruqsp', 'qny', 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
+        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
+        if( $rc['stat'] != 'ok' ) {
+            ciniki_core_dbTransactionRollback($ciniki, 'core');
+            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
+        } */
+        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
+            . "VALUES ('1', 'qruqsp', '43392', 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
         $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
         if( $rc['stat'] != 'ok' ) {
             ciniki_core_dbTransactionRollback($ciniki, 'core');
