@@ -715,7 +715,7 @@ then
     echoAndLog "OK: It looks like we already did a git clone of qruqsp into /ciniki/sites/qruqsp.local"
 else
     echoAndLog "* git clone qruqsp"
-    git clone https://github.com/qruqsp/qruqsp /ciniki/sites/qruqsp.local | tee -a /ciniki/logs/qruqsp_setup.txt
+    sudo -u pi git clone https://github.com/qruqsp/qruqsp /ciniki/sites/qruqsp.local | tee -a /ciniki/logs/qruqsp_setup.txt
 fi
 
 for needDir in /ciniki/sites/qruqsp.local/logs
@@ -733,9 +733,9 @@ done
 
 # We always want to git pull and git submodule update so that we have the latest updates to the qruqsp code
 echoAndLog "* git pull"
-git pull /ciniki/sites/qruqsp.local | tee -a /ciniki/logs/qruqsp_setup.txt
+sudo -u pi git pull /ciniki/sites/qruqsp.local | tee -a /ciniki/logs/qruqsp_setup.txt
 echoAndLog "* git submodule update"
-git submodule update --init /ciniki/sites/qruqsp.local | tee -a /ciniki/logs/qruqsp_setup.txt
+sudo -u pi git submodule update --init /ciniki/sites/qruqsp.local | tee -a /ciniki/logs/qruqsp_setup.txt
 
 # echoAndLog "* Make sure we have updated qruqsp code using git submodule update --init"
 # (cd /ciniki/sites/qruqsp.local && git submodule update --init) | tee -a /ciniki/logs/qruqsp_setup.txt
