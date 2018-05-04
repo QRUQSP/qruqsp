@@ -860,7 +860,11 @@ else
 fi
 
 if [[ ${PREPARE_ONLY} -eq 0 ]]; then
-    php /ciniki/sites/qruqspi.local/site/qruqsp-install.php ${DBENG} -dh ${database_host} -du ${database_username} -dp ${admin_password} -dn ${database_name} -ae ${admin_email} -au ${admin_username} -ap ${qruqsp_password} -mn ${master_name} -un {server_name} | tee -a /ciniki/logs/qruqsp_setup.txt
+    echoAndLog "OK: Running qruqsp-install"
+    php /ciniki/sites/qruqsp.local/site/qruqsp-install.php ${DBENG} -dh ${database_host} -du ${database_username} -dp ${admin_password} -dn ${database_name} -ae ${admin_email} -au ${admin_username} -ap ${qruqsp_password} -mn ${master_name} -un {server_name} | tee -a /ciniki/logs/qruqsp_setup.txt
+else
+    echoAndLog "OK: Linking index to pi-install.php"
+    ln -s /ciniki/sites/qruqsp.local/site/pi-install.php /ciniki/sites/qruqsp.local/site/index.php
 fi
 
 # if I need to rerun:

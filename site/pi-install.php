@@ -2208,7 +2208,6 @@ function install($ciniki_root, $modules_dir, $args) {
     //
     symlink($ciniki_root . '/ciniki-mods/core/scripts/sync.php', $ciniki_root . '/ciniki-sync.php');
     symlink($ciniki_root . '/ciniki-mods/core/scripts/json.php', $ciniki_root . '/ciniki-json.php');
-    symlink($ciniki_root . '/ciniki-mods/web/scripts/index.php', $ciniki_root . '/index.php');
     symlink($ciniki_root . '/ciniki-mods/core/scripts/manage.php', $ciniki_root . '/ciniki-manage.php');
     symlink($ciniki_root . '/ciniki-mods/core/scripts/login.php', $ciniki_root . '/ciniki-login.php');
 
@@ -2224,6 +2223,11 @@ function install($ciniki_root, $modules_dir, $args) {
         unlink($ciniki_root . '/index.php');
         return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
     }
+
+    if( file_exists($ciniki_root . '/index.php') ) {
+        unlink($ciniki_root . '/index.php');
+    }
+    symlink($ciniki_root . '/ciniki-mods/web/scripts/index.php', $ciniki_root . '/index.php');
 
     return array('form'=>'no', 'err'=>'install', 'msg'=>'');
 }
