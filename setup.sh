@@ -45,6 +45,27 @@ echoAndLog "------------------------------------------------------"
 echoAndLog "| START $0"
 echoAndLog "------------------------------------------------------"
 
+# Arguments to control actions of script
+# -p - Do everything except load database and setup station, this will be done when pi is started by user
+PREPARE_ONLY=0
+
+# Check for arguments
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+    key="$1"
+
+    case $key in
+        -p)
+        PREPARE_ONLY=1
+        shift
+        ;;
+    *)
+        shift
+        ;;
+    esac
+done
+
 # Check if we are root.
 ID=`id -u`
 if [ `id -u` -ne 0 ]
@@ -141,28 +162,32 @@ database_username="admin"
 # read database_name
 database_name="qruqsp"
 
-echo "Please enter admin_email: "
-read admin_email
-echoAndLog "admin_email=${admin_email}"
+# Only capture user information if run by user, ignore when prepare SD card
+if [[ ${PREPARE_ONLY} -eq 0 ]]; then
 
-echo "Please enter callsign"
-read callsign
-echoAndLog "callsign=${callsign}"
+    echo "Please enter admin_email: "
+    read admin_email
+    echoAndLog "admin_email=${admin_email}"
 
-echo "Please enter your preferred password for ${callsign}"
-read -s qruqsp_password
+    echo "Please enter callsign"
+    read callsign
+    echoAndLog "callsign=${callsign}"
 
-echo
-echo "Please enter your preferred password for ${callsign} AGAIN"
-read -s again_qruqsp_password 
-echo
+    echo "Please enter your preferred password for ${callsign}"
+    read -s qruqsp_password
 
-if [ "${qruqsp_password}X" == "${again_qruqsp_password}X" ]
-then
-    echoAndLog "OK: Passwords match"
-else
-    echoAndLog "FATAL: Passwords do not match please run again ${0}"
-    exit 1
+    echo
+    echo "Please enter your preferred password for ${callsign} AGAIN"
+    read -s again_qruqsp_password 
+    echo
+
+    if [ "${qruqsp_password}X" == "${again_qruqsp_password}X" ]
+    then
+        echoAndLog "OK: Passwords match"
+    else
+        echoAndLog "FATAL: Passwords do not match please run again ${0}"
+        exit 1
+    fi
 fi
 
 # echo "Please enter admin_username: [callsign]"
@@ -809,12 +834,12 @@ else
     fi
 fi
 
-if [ -d /ciniki/sites/qruqsp.local/site ]
+if [ -d /ciniki/sites/qruqsp.local/.git ]
 then
     echoAndLog "OK: /ciniki/sites/qruqsp.local/.git exists"
 else
     echoAndLog "* FIXME: Do we want to automate the steps below and if so what values should be entered in run.ini?"
-    echoAndLog "* WARNING: /ciniki/sites/qruqsp.local/run.ini does not exist"
+    echoAndLog "* WARNING: /ciniki/sites/qruqsp.local/.git does not exist"
     echoAndLog "Copy /ciniki/sites/qruqsp.local/dev-tools/run.ini.default /ciniki/sites/qruqsp.local/run.ini and configure with your local settings."
     echoAndLog "This will allow you to execute ./run.php and see the history of API calls and repeat any calls you want, useful for testing the API."
     echoAndLog "* FIXME: Turn on the password caching for git so you don't have to enter your github username/password everytime you push. Example usage below:"
@@ -834,13 +859,15 @@ else
     echoAndLog "OK: MySQL version is ${MYSQLVER} and threfore the Aria Database Engine will be InnoBB as preferred. The work-around for MariaDB versions 10.1 and 10.2 are not required."
 fi
 
-php /ciniki/sites/qruqsp.local/site/qruqsp-install.php ${DBENG} -dh ${database_host} -du ${database_username} -dp ${admin_password} -dn ${database_name} -ae ${admin_email} -au ${admin_username} -ap ${qruqsp_password} -mn ${master_name} -un {server_name} | tee -a /ciniki/logs/qruqsp_setup.txt
+if [[ ${PREPARE_ONLY} -eq 0 ]]; then
+    php /ciniki/sites/qruqspi.local/site/qruqsp-install.php ${DBENG} -dh ${database_host} -du ${database_username} -dp ${admin_password} -dn ${database_name} -ae ${admin_email} -au ${admin_username} -ap ${qruqsp_password} -mn ${master_name} -un {server_name} | tee -a /ciniki/logs/qruqsp_setup.txt
+fi
 
 # if I need to rerun:
 # mysqladmin drop qruqsp
 # rm -rf /ciniki/sites/qruqsp.local
 
-CINIKICRONS=`crontab -l | egrep -c "/ciniki/sites/ciniki.com/site/ciniki-mods/cron/scripts/cron.php"`
+CINIKICRONS=`crontab -l | egrep -c "/ciniki/sites/qruqsp.local/site/ciniki-mods/cron/scripts/cron.php"`
 if [ "${CINIKICRONS}X" == "3X" ]
 then
     echoAndLog "OK: root crontab already includes ${CINIKICRONS} ciniki cron.php entries"
