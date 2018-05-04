@@ -146,13 +146,37 @@ if( php_sapi_name() == 'cli' ) {
 // Running via web browser
 //
 else {
-    if( !isset($_POST['database_host']) ) {
+    if( !isset($_POST['callsign']) ) {
         print_page('yes', '', '');
     } else {
-        $args = $_POST;
-        $args['server_name'] = $_SERVER['SERVER_NAME'];
-        $args['request_uri'] = $_SERVER['REQUEST_URI'];
-        $args['http_host'] = $_SERVER['HTTP_HOST'];
+        //
+        // Read in the /home/pi/.my.cnf 
+        //
+        $mysql_settings = file_get_contents("/home/pi/.my.cnf");
+        $mycnf = parse_ini_string($mysql_settings, TRUE);
+        
+        $args = array(
+            'database_engine' => 'mysql',
+            'database_host' => 'localhost',
+            'database_username' => $mycnf['client']['user'],
+            'database_password' => $mycnf['client']['password'],
+            'database_name' => 'qruqsp',
+            'admin_email' => $_POST['email'],
+            'admin_username' => strtolower($_POST['callsign']),
+            'admin_password' => $_POST['password'],
+            'admin_firstname' => $_POST['first'],
+            'admin_lastname' => $_POST['last'],
+            'admin_display_name' => strtoupper($_POST['callsign']),
+            'master_name' => strtoupper($_POST['callsign']),
+            'system_email' => $_POST['email'],
+            'system_email_name' => $_POST['callsign'],
+            'sync_code_url' => '',
+            'server_name' => $_SERVER['SERVER_NAME'],
+            'request_uri' => $_SERVER['REQUEST_URI'],
+            'http_host' => $_SERVER['HTTP_HOST'],
+            'disable_ssl' => 'yes',
+            );
+
         $rc = install($ciniki_root, $modules_dir, $args);
         print_page($rc['form'], $rc['err'], $rc['msg']);
     }
@@ -166,7 +190,7 @@ function print_page($display_form, $err_code, $err_msg) {
 <!DOCTYPE html>
 <html>
 <head>
-<title>QRUQSP Installer</title>
+<title>QRUQSP Pi Installer</title>
 <style>
 body { background: #fafafa; }
 /******* The top bar across the window ******/
@@ -292,6 +316,12 @@ body { background: #fafafa; }
     color: #99a;
     max-height: 20px;
     vertical-align: top;
+}
+input,
+table,
+form,
+div {
+    box-sizing: border-box;
 }
 /* These can be specific for help or apps by add #m_container or #m_help in front */
 div.narrow {
@@ -1643,7 +1673,7 @@ table.list > tbody > tr.followup > td.content {
     <table id="mc_header" class="headerbar" cellpadding="0" cellspacing="0">
         <tr>
         <td id="mc_home_button" style="display:none;"><img src="ciniki-mods/core/ui/themes/default/img/home_button.png"/></td>
-        <td id="mc_title" class="title">Ciniki Installer</td>
+        <td id="mc_title" class="title">QRUQSP Pi Installer</td>
         <td id="mc_help_button" style="display:none;"><img src="ciniki-mods/core/ui/themes/default/img/help_button.png"/></td>
         </tr>
     </table>
@@ -1664,60 +1694,25 @@ table.list > tbody > tr.followup > td.content {
                 ?>
                 <?php if( $display_form == 'yes' ) { ?>
                     <form id="mapp_installer_form" method="POST" name="mapp_installer_form">
-                        <h2>Database</h2>
-                        <table class="list noheader form outline" cellspacing='0' cellpadding='0'>
-                            <tbody>
-                            <tr class="textfield"><td class="label"><label for="database_host">Host</label></td>
-                                <td class="input"><input id="database_host" name="database_host" type="text"/></td></tr>
-                            <tr class="textfield"><td class="label"><label for="database_username">User</label></td>
-                                <td class="input"><input type="text" id="database_username" name="database_username" /></td></tr>
-                            <tr class="textfield"><td class="label"><label for="database_password">Password</label></td>
-                                <td class="input"><input type="password" id="database_password" name="database_password" /></td></tr>
-                            <tr class="textfield"><td class="label"><label for="database_name">Name</label></td>
-                                <td class="input"><input type="text" id="database_name" name="database_name" /></td></tr>
-                            </tbody>
-                        </table>
-                        <h2>System Adminstrator</h2>
-                        <table class="list noheader form outline" cellspacing='0' cellpadding='0'>
-                            <tbody>
-                            <tr class="textfield"><td class="label"><label for="admin_email">Email</label></td>
-                                <td class="input"><input type="email" id="admin_email" name="admin_email" /></td></tr>
-                            <tr class="textfield"><td class="label"><label for="admin_username">Username</label></td>
-                                <td class="input"><input type="text" id="admin_username" name="admin_username" /></td></tr>
-                            <tr class="textfield"><td class="label"><label for="admin_password">Password</label></td>
-                                <td class="input"><input type="password" id="admin_password" name="admin_password" /></td></tr>
-                            <tr class="textfield"><td class="label"><label for="admin_firstname">First</label></td>
-                                <td class="input"><input type="text" id="admin_firstname" name="admin_firstname" /></td></tr>
-                            <tr class="textfield"><td class="label"><label for="admin_lastname">Last</label></td>
-                                <td class="input"><input type="text" id="admin_lastname" name="admin_lastname" /></td></tr>
-                            <tr class="textfield"><td class="label"><label for="admin_display_name">Display</label></td>
-                                <td class="input"><input type="text" id="admin_display_name" name="admin_display_name" placeholder=""/></td></tr>
-                            </tbody>
-                        </table>
-                        <h2>Master Business</h2>
                         <div class="section">
+                        <h2></h2>
                         <table class="list noheader form outline" cellspacing='0' cellpadding='0'>
                             <tbody>
-                            <tr class="textfield"><td class="label"><label for="master_name">Name</label></td>
-                                <td class="input"><input type="text" id="master_name" name="master_name" value="Ciniki System"/></td></tr>
-                            <tr class="textfield"><td class="label"><label for="system_email" >System Email</label></td>
-                                <td class="input"><input type="text" id="system_email" name="system_email" placeholder="For sending alerts and notifications"/></td></tr>
-                            <tr class="textfield"><td class="label"><label for="system_email_name">System Name</label></td>
-                                <td class="input"><input type="text" id="system_email_name" name="system_email_name" value="Ciniki Robot"/></td></tr>
-                            </tbody>
-                        </table>
-                        </div>
-                        <h2>Sync</h2>
-                        <div class="section">
-                        <table class="list noheader form outline" cellspacing='0' cellpadding='0'>
-                            <tbody>
-                            <tr class="textfield"><td class="label"><label for="sync_code_url">Code URL</label></td>
-                                <td class="input"><input type="text" id="sync_code_url" name="sync_code_url" value="http://ciniki.com/ciniki-code" /></td></tr>
+                            <tr class="textfield"><td class="label"><label for="first">First</label></td>
+                                <td class="input"><input type="text" id="first" name="first" /></td></tr>
+                            <tr class="textfield"><td class="label"><label for="last">Last</label></td>
+                                <td class="input"><input type="text" id="last" name="last" /></td></tr>
+                            <tr class="textfield"><td class="label"><label for="email">Email</label></td>
+                                <td class="input"><input type="email" id="email" name="email" /></td></tr>
+                            <tr class="textfield"><td class="label"><label for="callsign">Callsign</label></td>
+                                <td class="input"><input type="text" id="callsign" name="callsign" /></td></tr>
+                            <tr class="textfield"><td class="label"><label for="password">Password</label></td>
+                                <td class="input"><input type="password" id="password" name="password" /></td></tr>
                             </tbody>
                         </table>
                         </div>
                         <div style="text-align:center;">
-                            <input type="submit" value=" Install " class="button">
+                            <input type="submit" value=" Configure Station " class="button">
                         </div>
                     </form>
                 <?php } ?>
