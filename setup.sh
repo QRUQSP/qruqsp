@@ -236,6 +236,17 @@ else
     /bin/systemctl enable ssh | tee -a /ciniki/logs/qruqsp_setup.txt
 fi
 
+echoAndLog "Checking if git is installed..."
+gitInstalled=`which git | wc -l`
+if [[ ${gitInstalled} -eq 1 ]];
+then
+    echoAndLog "OK: git is installed"
+else
+    echoAndLog "WARN: git is not installed."
+    echoAndLog "* Attempting to install git..."
+    apt-get install -y git
+fi
+
 sshRunning=`/bin/systemctl status ssh | /usr/bin/awk '/Active/ {print $3}'`
 if [ "X$sshRunning" == "X(running)" ] 
 then
@@ -313,9 +324,9 @@ echoAndLog "* Running \"apt-get -y update\" to get the latest software and firmw
 echoAndLog "  This might take a while ..."
 apt-get -y update | tee -a /ciniki/logs/qruqsp_setup.txt
 
-echoAndLog "* Running \"apt-get -y dist-upgrade\" to get the latest software and firmware updates."
-echoAndLog "  This might take a while ..."
-apt-get -y dist-upgrade | tee -a /ciniki/logs/qruqsp_setup.txt
+#echoAndLog "* Running \"apt-get -y dist-upgrade\" to get the latest software and firmware updates."
+#echoAndLog "  This might take a while ..."
+#apt-get -y dist-upgrade | tee -a /ciniki/logs/qruqsp_setup.txt
 
 echoAndLog "The audio system on the Raspberry Pi has a history of many problems."
 # it was even worse the last time I struggled with it. I believe it is no longer included in the current version of Raspbian. ( See http://elinux.org/R-Pi_Troubleshooting#Removal_of_installed_pulseaudio )
