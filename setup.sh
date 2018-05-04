@@ -690,7 +690,7 @@ then
     echoAndLog "OK: qruqsp database exists"
 else
     echoAndLog "* Create qruqsp database because it does not already exist"
-    mysqladmin create qruqsp | tee -a /ciniki/logs/qruqsp_setup.txt
+    mysqladmin --default-character-set=latin1 create qruqsp | tee -a /ciniki/logs/qruqsp_setup.txt
 #    mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'admin'@'localhost' IDENTIFIED BY password '${admin_password}';" mysql
 fi
 echoAndLog "Install Apache and PHP if not already installed"
