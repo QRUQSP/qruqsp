@@ -735,7 +735,7 @@ done
 echoAndLog "* git pull"
 sudo -u pi git pull /ciniki/sites/qruqsp.local | tee -a /ciniki/logs/qruqsp_setup.txt
 echoAndLog "* git submodule update"
-sudo -u pi git submodule update --init /ciniki/sites/qruqsp.local | tee -a /ciniki/logs/qruqsp_setup.txt
+(cd /ciniki/sites/qruqsp.local && sudo -u pi git submodule update --init /ciniki/sites/qruqsp.local) | tee -a /ciniki/logs/qruqsp_setup.txt
 
 # echoAndLog "* Make sure we have updated qruqsp code using git submodule update --init"
 # (cd /ciniki/sites/qruqsp.local && git submodule update --init) | tee -a /ciniki/logs/qruqsp_setup.txt
