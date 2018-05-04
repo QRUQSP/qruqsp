@@ -1685,7 +1685,7 @@ table.list > tbody > tr.followup > td.content {
                 <div class="medium">
                 <?php
                     if( $err_code == 'installed' ) {
-                        print "<h2 class=''>Installed</h2><div class='bordered error'><p>Ciniki installed and configured, you can now login and finished installing the database.  </p><p><a href='/manager'>Login</a></p></div>";
+                        print "<h2 class=''>Installed</h2><div class='bordered error'><p>QRUQSP has been installed and configured, you can now login at </p><p><a href='/manager'>/manager</a></p></div>";
 
                     }
                     elseif( $err_code != '' ) {
@@ -2229,7 +2229,7 @@ function install($ciniki_root, $modules_dir, $args) {
     }
     symlink($ciniki_root . '/ciniki-mods/web/scripts/index.php', $ciniki_root . '/index.php');
 
-    return array('form'=>'no', 'err'=>'install', 'msg'=>'');
+    return array('form'=>'no', 'err'=>'installed', 'msg'=>'');
 }
 
 ?>
