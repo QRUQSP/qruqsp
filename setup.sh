@@ -683,6 +683,7 @@ else
     echo "" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
     echo "[client]" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
     echo "default-character-set = latin1" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+    service mysql restart | tee -a /ciniki/logs/qruqsp_setup.txt
 fi
 
 
