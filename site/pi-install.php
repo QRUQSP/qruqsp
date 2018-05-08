@@ -1809,6 +1809,7 @@ function install($ciniki_root, $modules_dir, $args) {
     $config['qruqsp.core'] = array();
     $config['qruqsp.core']['log_dir'] = dirname($ciniki_root) . '/logs';
     $config['qruqsp.43392'] = array();
+    $config['qruqsp.43392']['listener'] = 'active';
 
     //
     // Setup ciniki variable, just like ciniki-mods/core/private/init.php script, but we
