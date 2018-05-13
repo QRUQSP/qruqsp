@@ -876,7 +876,7 @@ if [[ ${PREPARE_ONLY} -eq 0 ]]; then
     php /ciniki/sites/qruqsp.local/site/qruqsp-install.php ${DBENG} -dh ${database_host} -du ${database_username} -dp ${admin_password} -dn ${database_name} -ae ${admin_email} -au ${admin_username} -ap ${qruqsp_password} -mn ${master_name} -un {server_name} | tee -a /ciniki/logs/qruqsp_setup.txt
 else
     echoAndLog "OK: Linking index to pi-install.php"
-    ln -s /ciniki/sites/qruqsp.local/site/pi-install.php /ciniki/sites/qruqsp.local/site/index.php
+    sudo -u pi ln -s /ciniki/sites/qruqsp.local/site/pi-install.php /ciniki/sites/qruqsp.local/site/index.php
 fi
 
 # if I need to rerun:
@@ -889,11 +889,11 @@ then
     echoAndLog "OK: root crontab already includes ${CINIKICRONS} ciniki cron.php entries"
 else
     echoAndLog "*Adding root crontab entries for ciniki cron.php"
-    crontab -l > /tmp/cinikirootcron
-    echo "*/5 * * * * sudo -u www-data /usr/bin/php /ciniki/sites/qruqsp.local/site/ciniki-mods/cron/scripts/cron.php ciniki.mail >>/ciniki/sites/qruqsp.local/logs/cron.log 2>&1" >> /tmp/cinikirootcron
-    echo "*/5 * * * * sudo -u www-data /usr/bin/php /ciniki/sites/qruqsp.local/site/ciniki-mods/cron/scripts/cron.php -ignore ciniki.mail >>/ciniki/sites/qruqsp.local/logs/cron.log 2>&1" >> /tmp/cinikirootcron
-    crontab /tmp/cinikirootcron
-    rm /tmp/cinikirootcron
+    sudo -u pi crontab -l > /tmp/cinikicron
+    echo "*/5 * * * * /usr/bin/php /ciniki/sites/qruqsp.local/site/ciniki-mods/cron/scripts/cron.php ciniki.mail >>/ciniki/sites/qruqsp.local/logs/cron.log 2>&1" >> /tmp/cinikicron
+    echo "*/5 * * * * /usr/bin/php /ciniki/sites/qruqsp.local/site/ciniki-mods/cron/scripts/cron.php -ignore ciniki.mail >>/ciniki/sites/qruqsp.local/logs/cron.log 2>&1" >> /tmp/cinikicron
+    sudo -u pi crontab /tmp/cinikicron
+    rm /tmp/cinikicron
 fi
 
 echoAndLog "Install lshw if not installed already"
