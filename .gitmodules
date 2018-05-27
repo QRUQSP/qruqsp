@@ -43,3 +43,6 @@
 [submodule "site/qruqsp-mods/core"]
 	path = site/qruqsp-mods/core
 	url = https://github.com/qruqsp/core
+[submodule "site/qruqsp-mods/logbook"]
+	path = site/qruqsp-mods/logbook
+	url = https://github.com/qruqsp/logbook

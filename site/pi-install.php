@@ -1790,18 +1790,30 @@ function install($ciniki_root, $modules_dir, $args) {
 
     // Sync settings
     $config['ciniki.core']['sync.name'] = $master_name;
-    $config['ciniki.core']['sync.url'] = "https://" . $args['server_name'] . "/" . preg_replace('/^\//', '', dirname($args['request_uri']) . "ciniki-sync.php");
+    if( isset($args['disable_ssl']) && $args['disable_ssl'] == 'yes' ) {
+        $config['ciniki.core']['sync.url'] = "http://" . $args['server_name'] . "/" . preg_replace('/^\//', '', dirname($args['request_uri']) . "ciniki-sync.php");
+    } else {
+        $config['ciniki.core']['sync.url'] = "https://" . $args['server_name'] . "/" . preg_replace('/^\//', '', dirname($args['request_uri']) . "ciniki-sync.php");
+    }
     $config['ciniki.core']['sync.full.hour'] = "13";
     $config['ciniki.core']['sync.partial.hour'] = "13";
     $config['ciniki.core']['sync.code.url'] = $sync_code_url;
     $config['ciniki.core']['sync.log_lvl'] = 0;
     $config['ciniki.core']['sync.log_dir'] = dirname($ciniki_root) . "/logs";
     $config['ciniki.core']['sync.lock_dir'] = dirname($ciniki_root) . "/logs";
-    $config['ciniki.core']['manage.url'] = "https://" . $args['server_name'] . "/" . preg_replace('/^\//', '', dirname($args['request_uri']) . "manager");
+    if( isset($args['disable_ssl']) && $args['disable_ssl'] == 'yes' ) {
+        $config['ciniki.core']['manage.url'] = "http://" . $args['server_name'] . "/" . preg_replace('/^\//', '', dirname($args['request_uri']) . "manager");
+    } else {
+        $config['ciniki.core']['manage.url'] = "https://" . $args['server_name'] . "/" . preg_replace('/^\//', '', dirname($args['request_uri']) . "manager");
+    }
 
     // Configure users module settings for password recovery
     $config['ciniki.users']['password.forgot.notify'] = $admin_email;
-    $config['ciniki.users']['password.forgot.url'] = "https://" . $args['server_name'] . "/" . preg_replace('/^\/$/', '', dirname($args['request_uri']));
+    if( isset($args['disable_ssl']) && $args['disable_ssl'] == 'yes' ) {
+        $config['ciniki.users']['password.forgot.url'] = "http://" . $args['server_name'] . "/" . preg_replace('/^\/$/', '', dirname($args['request_uri']));
+    } else {
+        $config['ciniki.users']['password.forgot.url'] = "https://" . $args['server_name'] . "/" . preg_replace('/^\/$/', '', dirname($args['request_uri']));
+    }
 
     $config['ciniki.web'] = array();
     $config['ciniki.mail'] = array();
@@ -1810,6 +1822,7 @@ function install($ciniki_root, $modules_dir, $args) {
     $config['qruqsp.core']['log_dir'] = dirname($ciniki_root) . '/logs';
     $config['qruqsp.43392'] = array();
     $config['qruqsp.43392']['listener'] = 'active';
+    $config['qruqsp.43392']['rtl_433_cmd'] = '/usr/local/bin/rtl_433';
 
     //
     // Setup ciniki variable, just like ciniki-mods/core/private/init.php script, but we
