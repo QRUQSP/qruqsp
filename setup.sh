@@ -892,12 +892,52 @@ else
     sudo -u pi crontab -l > /tmp/cinikicron
     echo "*/5 * * * * /usr/bin/php /ciniki/sites/qruqsp.local/site/ciniki-mods/cron/scripts/cron.php ciniki.mail >>/ciniki/sites/qruqsp.local/logs/cron.log 2>&1" >> /tmp/cinikicron
     echo "*/5 * * * * /usr/bin/php /ciniki/sites/qruqsp.local/site/ciniki-mods/cron/scripts/cron.php -ignore ciniki.mail >>/ciniki/sites/qruqsp.local/logs/cron.log 2>&1" >> /tmp/cinikicron
+    echo "*/1 * * * * /usr/bin/php /ciniki/sites/qruqsp.local/site/ciniki-mods/i2c/scripts/poll.php >>/ciniki/sites/qruqsp.local/logs/i2c.log 2>&1" >> /tmp/cinikicron
     sudo -u pi crontab /tmp/cinikicron
     rm /tmp/cinikicron
 fi
 
 echoAndLog "Install lshw if not installed already"
 apt-get -y install lshw
+
+#
+# The dtparam=i2c_arm=on should be commented out. The i2c is setup
+# in on alternate gpio pins to allow for push button shutdown/startup.
+#
+DTOVERLAYI2CARM=`awk '/^dtparam.*=.*i2c/' /boot/config.txt`
+if [ "${DTOVERLAYI2CARM}X" != "X" ]
+then 
+    echoAndLog "WARNING: ${DTOVERLAYI2CARM} enabled in /boot/config.txt"
+else
+    echoAndLog "* OK: dtparam=i2c_arm=on not enabled in /boot/config.txt"
+fi
+
+#
+# Check for i2c enabled on alternate gpio pins. GPIO3 needs to
+# be left alone so it can be used for clean shutdown and restart. 
+#
+DTOVERLAYI2C=`awk '/^dtoverlay.*=.*i2c-gpio/' /boot/config.txt`
+
+if [ "${DTOVERLAYI2C}X" == "X" ]
+then
+    echo "dtoverlay=i2c-gpio,i2c_gpio_sda=2,i2c_gpio_scl=4" >> /boot/config.txt
+    echoAndLog "* Added: dtoverlay=i2c-gpio in /boot/config.txt"
+else
+    echoAndLog "* OK: ${DTOVERLAYI2C} in /boot/config.txt"
+fi
+
+#
+# Check to make sure GPIO3 is setup to clean shutdown pi
+#
+DTOVERLAYSHUTDOWN=`awk '/^dtoverlay.*=.*gpio-shutdown/' /boot/config.txt`
+
+if [ "${DTOVERLAYSHUTDOWN}X" == "X" ]
+then
+    echo "dtoverlay=gpio-shutdown,gpio_pin=3" >> /boot/config.txt
+    echoAndLog "* Added: dtoverlay=gpio-shutdown in /boot/config.txt"
+else
+    echoAndLog "* OK: ${DTOVERLAYSHUTDOWN} in /boot/config.txt"
+fi
 
 # Print any to do items here if we loaded them into this TODO variable earlier in the script. This is the last thing we want the user to see before END.
 TODOS=`echo ${TODO} | grep -c TODO`
