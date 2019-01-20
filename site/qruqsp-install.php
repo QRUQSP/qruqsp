@@ -1803,6 +1803,7 @@ function install($ciniki_root, $modules_dir, $args) {
     $config['ciniki.core']['sync.log_dir'] = dirname($ciniki_root) . "/logs";
     $config['ciniki.core']['sync.lock_dir'] = dirname($ciniki_root) . "/logs";
     $config['ciniki.core']['manage.url'] = "https://" . $args['server_name'] . "/" . preg_replace('/^\//', '', dirname($args['request_uri']) . "manager");
+    $config['ciniki.core']['update.script'] = dirname($ciniki_root) . '/update.sh';
 
     // Configure users module settings for password recovery
     $config['ciniki.users']['password.forgot.notify'] = $admin_email;

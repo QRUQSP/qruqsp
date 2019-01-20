@@ -487,7 +487,7 @@ fi
 
 echoAndLog "You should now have files, and more, in these locations, under /usr/local, owned by root."
 echoAndLog "Check for files that should have been created by the make of direwolf..."
-checkFiles /usr/local/bin/direwolf /usr/local/bin/decode_aprs /usr/local/bin/tt2text /usr/local/bin/text2tt /usr/local/bin/ll2utm /usr/local/bin/utm2ll /usr/local/bin/log2gpx /usr/local/bin/gen_packets /usr/share/applications/direwolf.desktop /usr/share/direwolf/tocalls.txt /usr/share/direwolf/symbolsX.txt /usr/share/direwolf/symbols-new.txt /usr/share/direwolf/dw-icon.png /usr/share/applications/direwolf.desktop 
+checkFiles /usr/local/bin/direwolf /usr/local/bin/decode_aprs /usr/local/bin/tt2text /usr/local/bin/text2tt /usr/local/bin/ll2utm /usr/local/bin/utm2ll /usr/local/bin/log2gpx /usr/local/bin/gen_packets /usr/local/share/applications/direwolf.desktop /usr/local/share/direwolf/tocalls.txt /usr/local/share/direwolf/symbolsX.txt /usr/local/share/direwolf/symbols-new.txt /usr/local/share/direwolf/pixmaps/dw-icon.png /usr/local/share/applications/direwolf.desktop 
     # FIXME: the following files seem to be expected but missing. Do we really need these?
     # /home/pi/Desktop/direwolf.desktop /home/pi/dw-start.sh /home/pi/dw-start.sh /home/pi/direwolf.conf /home/pi/direwolf.conf.keep 
 
