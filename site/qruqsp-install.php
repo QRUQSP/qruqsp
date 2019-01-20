@@ -2053,21 +2053,15 @@ function install($ciniki_root, $modules_dir, $args) {
             ciniki_core_dbTransactionRollback($ciniki, 'core');
             return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
         } */
-        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
-            . "VALUES ('1', 'qruqsp', '43392', 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
-        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
-        if( $rc['stat'] != 'ok' ) {
-            ciniki_core_dbTransactionRollback($ciniki, 'core');
-            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
+        foreach(['weather', 'i2c', '43392'] as $module) {
+            $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
+                . "VALUES ('1', 'qruqsp', $module, 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
+            $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
+            if( $rc['stat'] != 'ok' ) {
+                ciniki_core_dbTransactionRollback($ciniki, 'core');
+                return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
+            }
         }
-
-//        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
-//            . "VALUES ('1', 'ciniki', 'questions', 1, 'all_customers', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
-//        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
-//        if( $rc['stat'] != 'ok' ) {
-//            ciniki_core_dbTransactionRollback($ciniki, 'core');
-//            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
-//        }
 
         //
         // Setup notification settings
@@ -2079,14 +2073,6 @@ function install($ciniki_root, $modules_dir, $args) {
             ciniki_core_dbTransactionRollback($ciniki, 'core');
             return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
         }
-
-//        $strsql = "INSERT INTO ciniki_question_settings (tnid, detail_key, detail_value, date_added, last_updated) "
-//            . "VALUES ('1', 'add.notify.owners', 'yes', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
-//        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'questions');
-//        if( $rc['stat'] != 'ok' ) {
-//            ciniki_core_dbTransactionRollback($ciniki, 'core');
-//            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
-//        }
 
         //
         // Add the api key for the UI
@@ -2145,19 +2131,6 @@ function install($ciniki_root, $modules_dir, $args) {
     // Save the .htaccess file
     //
     $htaccess = ""
-        . "# Block evil spam bots\n"
-        . "# List found on : http://perishablepress.com/press/2006/01/10/stupid-htaccess-tricks/#sec1\n"
-        . "RewriteBase /\n"
-        . "RewriteCond %{HTTP_USER_AGENT} ^Anarchie [OR]\n"
-        . "RewriteCond %{HTTP_USER_AGENT} ^ASPSeek [OR]\n"
-        . "RewriteCond %{HTTP_USER_AGENT} ^attach [OR]\n"
-        . "RewriteCond %{HTTP_USER_AGENT} ^autoemailspider [OR]\n"
-        . "RewriteCond %{HTTP_USER_AGENT} ^Xaldon\ WebSpider [OR]\n"
-        . "RewriteCond %{HTTP_USER_AGENT} ^Xenu [OR]\n"
-        . "RewriteCond %{HTTP_USER_AGENT} ^Zeus.*Webster [OR]\n"
-        . "RewriteCond %{HTTP_USER_AGENT} ^Zeus\n"
-        . "RewriteRule ^.* - [F,L]\n"
-        . "\n"
         . "# Block access to internal code\n"
         . "\n"
         . "Options All -Indexes\n"
@@ -2179,7 +2152,6 @@ function install($ciniki_root, $modules_dir, $args) {
         . "RewriteRule ^manager/(.*)$ ciniki-manage.php [L]                                            # allow all ciniki-manage\n"
         . "RewriteRule ^(manager)$ ciniki-manage.php [L]                                             # allow all ciniki-manage\n"
         . "RewriteRule ^([a-z]+-mods/[^\/]*/ui/.*)$ $1 [L]                                                  # Allow manage content\n"
-//        . "RewriteRule ^(ciniki-manage-themes/.*)$ $1 [L]                                           # Allow manage-theme content\n"
         . "RewriteRule ^(ciniki-web-themes/.*)$ $1 [L]                                              # Allow manage-theme content\n"
         . "RewriteRule ^(ciniki-mods/web/layouts/.*)$ $1 [L]                                    # Allow web-layouts content\n"
         . "RewriteRule ^(ciniki-mods/web/themes/.*)$ $1 [L]                                     # Allow web-themes content\n"

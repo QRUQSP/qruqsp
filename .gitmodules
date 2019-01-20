@@ -46,3 +46,9 @@
 [submodule "site/qruqsp-mods/logbook"]
 	path = site/qruqsp-mods/logbook
 	url = https://github.com/qruqsp/logbook
+[submodule "site/qruqsp-mods/weather"]
+	path = site/qruqsp-mods/weather
+	url = https://github.com/qruqsp/weather
+[submodule "site/qruqsp-mods/i2c"]
+	path = site/qruqsp-mods/i2c
+	url = https://github.com/qruqsp/i2c
