@@ -2056,7 +2056,7 @@ function install($ciniki_root, $modules_dir, $args) {
         } */
         foreach(['weather', 'i2c', '43392'] as $module) {
             $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
-                . "VALUES ('1', 'qruqsp', $module, 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
+                . "VALUES ('1', 'qruqsp', '" . $module . "', 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
             $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
             if( $rc['stat'] != 'ok' ) {
                 ciniki_core_dbTransactionRollback($ciniki, 'core');
