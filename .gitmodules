@@ -52,3 +52,6 @@
 [submodule "site/qruqsp-mods/i2c"]
 	path = site/qruqsp-mods/i2c
 	url = https://github.com/qruqsp/i2c
+[submodule "site/qruqsp-mods/sams"]
+	path = site/qruqsp-mods/sams
+	url = https://github.com/qruqsp/sams
