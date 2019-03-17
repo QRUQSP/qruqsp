@@ -91,3 +91,6 @@
 [submodule "site/ciniki-mods/subscriptions"]
 	path = site/ciniki-mods/subscriptions
 	url = https://github.com/ciniki/subscriptions
+[submodule "site/ciniki-mods/tutorials"]
+	path = site/ciniki-mods/tutorials
+	url = https://github.com/ciniki/tutorials
