@@ -43,9 +43,6 @@
 [submodule "site/qruqsp-mods/core"]
 	path = site/qruqsp-mods/core
 	url = https://github.com/qruqsp/core
-[submodule "site/qruqsp-mods/logbook"]
-	path = site/qruqsp-mods/logbook
-	url = https://github.com/qruqsp/logbook
 [submodule "site/qruqsp-mods/weather"]
 	path = site/qruqsp-mods/weather
 	url = https://github.com/qruqsp/weather
@@ -58,3 +55,42 @@
 [submodule "site/qruqsp-mods/dashboard"]
 	path = site/qruqsp-mods/dashboard
 	url = https://github.com/qruqsp/dashboard
+[submodule "site/ciniki-mods/customers"]
+	path = site/ciniki-mods/customers
+	url = https://github.com/ciniki/customers
+[submodule "site/ciniki-mods/blog"]
+	path = site/ciniki-mods/blog
+	url = https://github.com/ciniki/blog
+[submodule "site/ciniki-mods/calendars"]
+	path = site/ciniki-mods/calendars
+	url = https://github.com/ciniki/calendars
+[submodule "site/ciniki-mods/audio"]
+	path = site/ciniki-mods/audio
+	url = https://github.com/ciniki/audio
+[submodule "site/ciniki-mods/events"]
+	path = site/ciniki-mods/events
+	url = https://github.com/ciniki/events
+[submodule "site/ciniki-mods/gallery"]
+	path = site/ciniki-mods/gallery
+	url = https://github.com/ciniki/gallery
+[submodule "site/ciniki-mods/info"]
+	path = site/ciniki-mods/info
+	url = https://github.com/ciniki/info
+[submodule "site/ciniki-mods/lapt"]
+	path = site/ciniki-mods/lapt
+	url = https://github.com/ciniki/lapt
+[submodule "site/ciniki-mods/links"]
+	path = site/ciniki-mods/links
+	url = https://github.com/ciniki/links
+[submodule "site/ciniki-mods/mail"]
+	path = site/ciniki-mods/mail
+	url = https://github.com/ciniki/mail
+[submodule "site/ciniki-mods/sponsors"]
+	path = site/ciniki-mods/sponsors
+	url = https://github.com/ciniki/sponsors
+[submodule "site/ciniki-mods/subscriptions"]
+	path = site/ciniki-mods/subscriptions
+	url = https://github.com/ciniki/subscriptions
+[submodule "site/ciniki-mods/tutorials"]
+	path = site/ciniki-mods/tutorials
+	url = https://github.com/ciniki/tutorials
