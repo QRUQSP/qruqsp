@@ -55,3 +55,6 @@
 [submodule "site/qruqsp-mods/sams"]
 	path = site/qruqsp-mods/sams
 	url = https://github.com/qruqsp/sams
+[submodule "site/qruqsp-mods/dashboard"]
+	path = site/qruqsp-mods/dashboard
+	url = https://github.com/qruqsp/dashboard

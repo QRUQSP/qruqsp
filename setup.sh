@@ -513,43 +513,64 @@ checkFiles /usr/local/bin/direwolf /usr/local/bin/decode_aprs /usr/local/bin/tt2
     # echoAndLog "Script to start Dire Wolf if it is not running already."
     # ls -l  /home/pi/direwolf.conf
 
-if [ -f /home/pi/direwolf.conf ]
-then
-    if [ "${1}X" == "initX" ]
-    then
-        echoAndLog "*** make install-conf. For now we will save your direwolf.conf"
-        echoAndLog "Backup the direwolf.conf to direwolf.conf.backup_${datetime}"
-        datetime=`date "+%Y-%m-%d_%H%M%S"`
-        cp -p /home/pi/direwolf.conf /home/pi/direwolf.conf.backup_${datetime}
-        ls -l /home/pi/direwolf.conf /home/pi/direwolf.conf.backup_${datetime} | tee -a /ciniki/logs/qruqsp_setup.txt
-        make -C /ciniki/src/direwolf install-conf | tee -a /ciniki/logs/qruqsp_setup.txt
-    else
-        echoAndLog "*** WARNING: When upgrading from an earlier version, you will probably want to skip make install-conf because it will wipe out your earlier configuration file."
-        echoAndLog "*** If this is your first time or you want to wipe out your earlier configuration file and start over then rerun this script with \"init\" as a command-line argument."
-        echoAndLog "*** A reminder will be printed immediately before exit."
-        TODO="*** TODO: If this is your first time or you want to wipe out your earlier configuration file and start over then rerun this script with \"init\" as a command-line argument as follows: sudo $0 init"
-    fi
-else
-    echoAndLog "We assume that this is the first time installing Dire Wolf and performing this step and /home/pi/direwolf.conf.keep can be used to restore the old version."
-    sudo -u pi make -C /ciniki/src/direwolf install-conf | tee -a /ciniki/logs/qruqsp_setup.txt
-fi
-
-echoAndLog "This step should have copied the initial configuration file to the home directory, /home/pidirewolf.conf. This is the initial configuration file."
-ls -l /home/pi/direwolf.conf | tee -a /ciniki/logs/qruqsp_setup.txt
-echoAndLog "Configuration file.  Search order is current working directory then the user’s home directory."
-echoAndLog "Go to your home directory and try to run direwolf."
-echoAndLog "cd ~ "
-echoAndLog "direwolf"
-echoAndLog "NOTE: You should see something like the following examples, because we have not yet configured it for using an audio device."
-echoAndLog "  EXAMPLE: Dire Wolf version ..."
-echoAndLog "  EXAMPLE: Audio device for both receive and transmit: default (channel 0)"
-echoAndLog "  EXAMPLE: Could not open audio device default for input"
-echoAndLog "  EXAMPLE: No such file or directory"
-echoAndLog "  EXAMPLE: Pointless to continue without audio device."
-sudo -u pi /usr/local/bin/direwolf | tee -a /ciniki/logs/qruqsp_setup.txt
-echoAndLog "We will perform the necessary configuration in a later step."
+#
+# Andrew removed following Apr 13, 2019. Direwolf.conf will now be standard conf as done below
+#
+#if [ -f /home/pi/direwolf.conf ]
+#then
+#    if [ "${1}X" == "initX" ]
+#    then
+#        echoAndLog "*** make install-conf. For now we will save your direwolf.conf"
+#        echoAndLog "Backup the direwolf.conf to direwolf.conf.backup_${datetime}"
+#        datetime=`date "+%Y-%m-%d_%H%M%S"`
+#        cp -p /home/pi/direwolf.conf /home/pi/direwolf.conf.backup_${datetime}
+#        ls -l /home/pi/direwolf.conf /home/pi/direwolf.conf.backup_${datetime} | tee -a /ciniki/logs/qruqsp_setup.txt
+#        make -C /ciniki/src/direwolf install-conf | tee -a /ciniki/logs/qruqsp_setup.txt
+#    else
+#        echoAndLog "*** WARNING: When upgrading from an earlier version, you will probably want to skip make install-conf because it will wipe out your earlier configuration file."
+#        echoAndLog "*** If this is your first time or you want to wipe out your earlier configuration file and start over then rerun this script with \"init\" as a command-line argument."
+#        echoAndLog "*** A reminder will be printed immediately before exit."
+#        TODO="*** TODO: If this is your first time or you want to wipe out your earlier configuration file and start over then rerun this script with \"init\" as a command-line argument as follows: sudo $0 init"
+#    fi
+#else
+#    echoAndLog "We assume that this is the first time installing Dire Wolf and performing this step and /home/pi/direwolf.conf.keep can be used to restore the old version."
+#    sudo -u pi make -C /ciniki/src/direwolf install-conf | tee -a /ciniki/logs/qruqsp_setup.txt
+#fi
+#
+#echoAndLog "This step should have copied the initial configuration file to the home directory, /home/pidirewolf.conf. This is the initial configuration file."
+#ls -l /home/pi/direwolf.conf | tee -a /ciniki/logs/qruqsp_setup.txt
+#echoAndLog "Configuration file.  Search order is current working directory then the user’s home directory."
+#echoAndLog "Go to your home directory and try to run direwolf."
+#echoAndLog "cd ~ "
+#echoAndLog "direwolf"
+#echoAndLog "NOTE: You should see something like the following examples, because we have not yet configured it for using an audio device."
+#echoAndLog "  EXAMPLE: Dire Wolf version ..."
+#echoAndLog "  EXAMPLE: Audio device for both receive and transmit: default (channel 0)"
+#echoAndLog "  EXAMPLE: Could not open audio device default for input"
+#echoAndLog "  EXAMPLE: No such file or directory"
+#echoAndLog "  EXAMPLE: Pointless to continue without audio device."
+#sudo -u pi /usr/local/bin/direwolf | tee -a /ciniki/logs/qruqsp_setup.txt
+#echoAndLog "We will perform the necessary configuration in a later step."
 # tput init resets the silly ANSI color scheme that is set by direwolf
-tput init
+#tput init
+
+#
+# direwolf is now configured in the UI, and conf files are generated
+# when listener is started
+#
+#if [ -f /ciniki/sites/qruqsp.local/direwolf.conf ]
+#then
+#    echo " " > /ciniki/sites/qruqsp.local/direwolf.conf
+#    echo "ADEVICE plughw:1,0" > /ciniki/sites/qruqsp.local/direwolf.conf
+#    echo "ACHANNELS 1" > /ciniki/sites/qruqsp.local/direwolf.conf
+#    echo "CHANNEL 0" > /ciniki/sites/qruqsp.local/direwolf.conf
+#    echo "MYCALL QRUQSP" > /ciniki/sites/qruqsp.local/direwolf.conf
+#    echo "MODEM 1200" > /ciniki/sites/qruqsp.local/direwolf.conf
+#    echo "PTT GPIO 23" > /ciniki/sites/qruqsp.local/direwolf.conf
+#    echo "DWAIT 0" > /ciniki/sites/qruqsp.local/direwolf.conf
+#    echo "TXDELAY 10" > /ciniki/sites/qruqsp.local/direwolf.conf
+#    echo "TXTAIL 10" > /ciniki/sites/qruqsp.local/direwolf.conf
+#fi
 
 echoAndLog "This completes the instructions from Raspberry-Pi-APRS.pdf which are required at this time."
 echoAndLog "We can stop at the section called Interface for Radio. Here we are using the SDR dongle rather than a USB audio adapter."
@@ -892,7 +913,8 @@ else
     sudo -u pi crontab -l > /tmp/cinikicron
     echo "*/5 * * * * /usr/bin/php /ciniki/sites/qruqsp.local/site/ciniki-mods/cron/scripts/cron.php ciniki.mail >>/ciniki/sites/qruqsp.local/logs/cron.log 2>&1" >> /tmp/cinikicron
     echo "*/5 * * * * /usr/bin/php /ciniki/sites/qruqsp.local/site/ciniki-mods/cron/scripts/cron.php -ignore ciniki.mail >>/ciniki/sites/qruqsp.local/logs/cron.log 2>&1" >> /tmp/cinikicron
-    echo "*/1 * * * * /usr/bin/php /ciniki/sites/qruqsp.local/site/ciniki-mods/i2c/scripts/poll.php >>/ciniki/sites/qruqsp.local/logs/i2c.log 2>&1" >> /tmp/cinikicron
+    echo "* * * * * /usr/bin/php /ciniki/sites/qruqsp.local/site/ciniki-mods/tnc/scripts/check.php >>/ciniki/sites/qruqsp.local/logs/cron.log 2>&1" >> /tmp/cinikicron
+    echo "* * * * * /usr/bin/php /ciniki/sites/qruqsp.local/site/ciniki-mods/i2c/scripts/poll.php >>/ciniki/sites/qruqsp.local/logs/i2c.log 2>&1" >> /tmp/cinikicron
     sudo -u pi crontab /tmp/cinikicron
     rm /tmp/cinikicron
 fi
