@@ -101,6 +101,10 @@ then
         echoAndLog "OS=${OS} REV=${REV} ARCH=${ARCH} PLAT=${PLAT} NAME=${NAME}"
         echoAndLog "OK: $OS kernel revision $REV is known to work and good results are expected."
       ;;
+      4.14.*)
+        echoAndLog "OS=${OS} REV=${REV} ARCH=${ARCH} PLAT=${PLAT} NAME=${NAME}"
+        echoAndLog "OK: $OS kernel revision $REV is known to work and good results are expected."
+      ;;
       *)
         echoAndLog "OS=${OS} REV=${REV} ARCH=${ARCH} PLAT=${PLAT} NAME=${NAME}"
         echoAndLog "WARNING: $OS kernel revision $REV is NOT KNOWN to work. Please let us know how it works."
