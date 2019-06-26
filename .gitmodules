@@ -94,3 +94,6 @@
 [submodule "site/ciniki-mods/tutorials"]
 	path = site/ciniki-mods/tutorials
 	url = https://github.com/ciniki/tutorials
+[submodule "site/qruqsp-mods/tutorials"]
+	path = site/qruqsp-mods/tutorials
+	url = https://github.com/qruqsp/tutorials
