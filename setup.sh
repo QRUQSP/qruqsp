@@ -49,7 +49,11 @@ echoAndLog "------------------------------------------------------"
 # -p - Do everything except load database and setup station, this will be done when pi is started by user
 PREPARE_ONLY=0
 
+#
 # Check for arguments
+#
+# -p - Prepare SD image, do not setup QRUQSP
+#
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
@@ -623,8 +627,8 @@ fi
 # Make a backup of your SD card (optional)
 echoAndLog "After going through all of these steps, you might want to make a backup so you can get back to this point quickly if the memory card gets trashed. Here’s how: https://www.raspberrypi.org/forums/viewtopic.php?p=239331"
 
-echoAndLog "Installing mysql-server if not already installed"
-apt-get -y install mysql-server | tee -a /ciniki/logs/qruqsp_setup.txt
+echoAndLog "Installing mariadb-server if not already installed"
+apt-get -y install mariadb-server | tee -a /ciniki/logs/qruqsp_setup.txt
 
 checkFiles /etc/mysql/my.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
 
@@ -731,7 +735,7 @@ else
 #    mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'admin'@'localhost' IDENTIFIED BY password '${admin_password}';" mysql
 fi
 echoAndLog "Install Apache and PHP if not already installed"
-apt-get -y install apache2 php7.0-xml php7.0-imagick php7.0-intl php7.0-curl php7.0-mysql php7.0-json php7.0-readline php7.0-imap libapache2-mod-php7.0 | tee -a /ciniki/logs/qruqsp_setup.txt
+apt-get -y install apache2 php-xml php-imagick php-intl php-curl php-mysql php-json php-readline php-imap libapache2-mod-php | tee -a /ciniki/logs/qruqsp_setup.txt
 
 if [ `egrep -c '127.0.1.1\s+qruqsp.local\s+qruqsp' /etc/hosts` == "1" ]
 then
@@ -923,6 +927,72 @@ else
     rm /tmp/cinikicron
 fi
 
+#
+# When prepare only mode specified, then setup for wifi hotspot
+#
+if [[ ${PREPARE_ONLY} -eq 1 ]]; then
+    #
+    # Setup for wifi hotspot
+    #
+    echoAndLog "Install hostapd and dnsmasq"
+    apt-get -y install hostapd dnsmasq
+    
+    # Setup the /etc/hostapd/hostapd.conf file
+    if [ -f /etc/hostapd/hostapd.conf ]
+    then
+        echoAndLog "It looks like we have already have a config for hostspot"
+    else
+        echoAndLog "Setup /etc/hostapd/hostapd.conf file"
+        echo "interface=wlan0" >> /etc/hostapd/hostapd.conf
+        echo "driver=nl80211" >> /etc/hostapd/hostapd.conf
+        echo "ssid=QRUQSP" >> /etc/hostapd/hostapd.conf
+        echo "hw_mode=g" >> /etc/hostapd/hostapd.conf
+        echo "channel=1" >> /etc/hostapd/hostapd.conf
+        echo "wmm_enabled=1" >> /etc/hostapd/hostapd.conf
+        echo "macaddr_acl=0" >> /etc/hostapd/hostapd.conf
+        echo "auth_algs=1" >> /etc/hostapd/hostapd.conf
+        echo "ignore_broadcast_ssid=0" >> /etc/hostapd/hostapd.conf
+        echo "wpa=2" >> /etc/hostapd/hostapd.conf
+        echo "wpa_passphrase=hamradio" >> /etc/hostapd/hostapd.conf
+        echo "wpa_key_mgmt=WPA-PSK" >> /etc/hostapd/hostapd.conf
+        echo "wpa_pairwise=TKIP" >> /etc/hostapd/hostapd.conf
+        echo "wpa_pairwise=CCMP" >> /etc/hostapd/hostapd.conf
+    fi
+    # setup the /etc/default/hostapd conf file
+    HOSTAPD=`egrep -c "^[^#]*DAEMON_CONF=" /etc/default/hostapd`
+    if [ "${HOSTAPD}X" == "0X" ]
+    then
+        echoAndLog "Add: DAEMON_CONF line to /etc/default/hostapd"
+        echo "DAEMON_CONF='/etc/hostapd/hostapd.conf'" >> /etc/default/hostapd
+    fi
+
+    # Setup the /etc/dnsmasq/dnsmasq.conf file
+    DNSMASQ=`egrep -c "^[^#]*dhcp-range=" /etc/dnsmasq/dnsmasq.conf`;
+    if [ "${DNSMASQ}X" == "0X" ]
+    then
+        echoAndLog "Setup /etc/dnsmasq/dnsmasq.conf file"
+        echo "interface=wlan0" >> /etc/dnsmasq/dnsmasq.conf
+        echo "domain-needed" >> /etc/dnsmasq/dnsmasq.conf
+        echo "bogus-priv" >> /etc/dnsmasq/dnsmasq.conf
+        echo "dhcp-range=10.99.1.50,10.99.1.250,255.255.255.0,24h" >> /etc/dnsmasq/dnsmasq.conf
+    fi
+
+    # Check for /etc/dhcpcd.conf setup
+    DHCPWLAN=`egrep -c "^[^#]*interface wlan0=" /etc/dhcpcd.conf`;
+    if [ "${DHCPWLAN}X" == "0X" ]
+    then
+        echoAndLog "Setup /etc/dhcpcd.conf file"
+        echo "interface wlan0" >> /etc/dhcpcd.conf
+        echo "    static ip_address=10.99.1.1/24" >> /etc/dhcpcd.conf
+        echo "    nohook wpa_supplicant" >> /etc/dhcpcd.conf
+    fi
+
+    systemctl unmask hostapd | tee -a /ciniki/logs/qruqsp_setup.txt
+    systemctl enable hostapd | tee -a /ciniki/logs/qruqsp_setup.txt
+    systemctl start hostapd | tee -a /ciniki/logs/qruqsp_setup.txt
+    systemctl start dnsmasq | tee -a /ciniki/logs/qruqsp_setup.txt
+fi
+
 echoAndLog "Install lshw if not installed already"
 apt-get -y install lshw
 
@@ -946,7 +1016,7 @@ DTOVERLAYI2C=`awk '/^dtoverlay.*=.*i2c-gpio/' /boot/config.txt`
 
 if [ "${DTOVERLAYI2C}X" == "X" ]
 then
-    echo "dtoverlay=i2c-gpio,i2c_gpio_sda=2,i2c_gpio_scl=4" >> /boot/config.txt
+    echo "dtoverlay=i2c-gpio,i2c_gpio_sda=17,i2c_gpio_scl=27" >> /boot/config.txt
     echoAndLog "* Added: dtoverlay=i2c-gpio in /boot/config.txt"
 else
     echoAndLog "* OK: ${DTOVERLAYI2C} in /boot/config.txt"
