@@ -657,9 +657,6 @@ else
     echo "[client]" > /home/pi/.my.cnf
     echo "user=admin" >> /home/pi/.my.cnf
     echo "password=${admin_password}" >> /home/pi/.my.cnf
-    # FIXME: random password 32 characters
-    # FIXME: create admin user
-    # FIXME: mysql grant all on *.* to 'admin'@'localhost' identified by $password
 fi
 
 echoAndLog "Chown pi:pi /home/pi/.my.cnf and chmod 700 /home/pi/.my.cnf just in case it is not set correctly"
@@ -715,16 +712,6 @@ else
     service mysql restart | tee -a /ciniki/logs/qruqsp_setup.txt
 fi
 
-
-echoAndLog "Checking for database admin user..."
-if [ `mysql --user root -sse 'SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = "admin")' mysql` == "1" ]
-then
-    echoAndLog "OK: database admin exists"
-else
-    echoAndLog "* Create database admin user because it does not already exist"
-    mysql -e "GRANT ALL PRIVILEGES ON 'qruqsp'.* TO 'admin'@'localhost' IDENTIFIED BY '${admin_password}';" mysql
-fi
-
 echoAndLog "Checking for qruqsp database..."
 if [ `mysqlshow qruqsp | grep -c 'Database: qruqsp'` == "1" ]
 then
@@ -732,8 +719,17 @@ then
 else
     echoAndLog "* Create qruqsp database because it does not already exist"
     mysqladmin --default-character-set=latin1 create qruqsp | tee -a /ciniki/logs/qruqsp_setup.txt
-#    mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'admin'@'localhost' IDENTIFIED BY password '${admin_password}';" mysql
 fi
+
+echoAndLog "Checking for database admin user..."
+if [ `mysql --user root -sse 'SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = "admin")' mysql` == "1" ]
+then
+    echoAndLog "OK: database admin exists"
+else
+    echoAndLog "* Create database admin user because it does not already exist"
+    mysql -e "GRANT ALL PRIVILEGES ON qruqsp.* TO 'admin'@'localhost' IDENTIFIED BY '${admin_password}';" mysql
+fi
+
 echoAndLog "Install Apache and PHP if not already installed"
 apt-get -y install apache2 php-xml php-imagick php-intl php-curl php-mysql php-json php-readline php-imap libapache2-mod-php | tee -a /ciniki/logs/qruqsp_setup.txt
 
