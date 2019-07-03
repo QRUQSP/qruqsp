@@ -1006,9 +1006,9 @@ usermod -a -G tty pi
 # Setup apache2 to use /tmp instead of private tmp, this allows the php scripts
 # access to the /tmp/kisspts for direwolf
 #
-if [ -d /ciniki/src/rtl-sdr/build ]
+if [ -d /etc/systemd/system/apache2.service ]
 then
-    echoAndLog "OK: we have already setup private tmp"
+    echoAndLog "OK: apache2 PrivateTmp is set to false"
 else
     cat /lib/systemd/system/apache2.service |sed 's/PrivateTmp=true/PrivateTmp=false/g' >/etc/systemd/system/apache2.service
 fi
