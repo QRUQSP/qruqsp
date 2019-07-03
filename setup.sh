@@ -995,6 +995,24 @@ if [[ ${PREPARE_ONLY} -eq 1 ]]; then
     systemctl start dnsmasq | tee -a /ciniki/logs/qruqsp_setup.txt
 fi
 
+#
+# Make sure the pi user has been added to group tty so they can use
+# the tty for direwolf to send and receive
+#
+echoAndLog "Make sure pi user is added to group tty for direwolf transmit"
+usermod -a -G tty pi
+
+#
+# Setup apache2 to use /tmp instead of private tmp, this allows the php scripts
+# access to the /tmp/kisspts for direwolf
+#
+if [ -d /ciniki/src/rtl-sdr/build ]
+then
+    echoAndLog "OK: we have already setup private tmp"
+else
+    cat /lib/systemd/system/apache2.service |sed 's/PrivateTmp=true/PrivateTmp=false/g' >/etc/systemd/system/apache2.service
+fi
+
 echoAndLog "Install lshw if not installed already"
 apt-get -y install lshw
 
