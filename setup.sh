@@ -702,9 +702,9 @@ else
     echo "#" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
     echo "# Additional settings for Ciniki and qruqsp" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
     echo "#" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
-    echo "innodb_large_prefix = 1" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
-    echo "innodb_file_format = barracuda" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
-    echo "innodb_file_format_max = barracuda" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+#    echo "innodb_large_prefix = 1" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+#    echo "innodb_file_format = barracuda" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+#    echo "innodb_file_format_max = barracuda" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
     echo "innodb_file_per_table = 1" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
     echo "# sql_mode = \"NO_ENGINE_SUBSTITUTION\"" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
     echo "character-set-server = latin1" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
@@ -722,7 +722,7 @@ then
     echoAndLog "OK: database admin exists"
 else
     echoAndLog "* Create database admin user because it does not already exist"
-    mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'admin'@'localhost' IDENTIFIED BY '${admin_password}';" mysql
+    mysql -e "GRANT ALL PRIVILEGES ON 'qruqsp'.* TO 'admin'@'localhost' IDENTIFIED BY '${admin_password}';" mysql
 fi
 
 echoAndLog "Checking for qruqsp database..."
@@ -751,15 +751,10 @@ else
     rm /ciniki/logs/hosts.qruqsp
 fi
 
-if [ -f /ciniki/sites/qruqsp.local/site/qruqsp-install.php ]
-then
-    echoAndLog "OK: It looks like we already did a git clone of qruqsp into /ciniki/sites/qruqsp.local"
-else
-    echoAndLog "* git clone qruqsp"
-    sudo -u pi git clone https://github.com/qruqsp/qruqsp /ciniki/sites/qruqsp.local | tee -a /ciniki/logs/qruqsp_setup.txt
-fi
-
-for needDir in /ciniki/sites/qruqsp.local/logs
+#
+# Setup the directory structure and get the latest pi code
+#
+for needDir in /ciniki/sites/qruqsp.local /ciniki/sites/qruqsp.local/site /ciniki/sites/qruqsp.local/logs /ciniki/sites/qruqsp.local/site/ciniki-mods /ciniki/sites/qruqsp.local/site/qruqsp-mods /ciniki/sites/qruqsp.local/site/ciniki-cache /ciniki/sites/qruqsp.local/site/ciniki-storage /ciniki/sites/qruqsp.local/site/ciniki-picode
 do
     if [ -d ${needDir} ]
     then
@@ -772,11 +767,26 @@ do
     fi
 done
 
+#
+# Mirror the latest code from ciniki-picode directory at qruqsp.org
+#
+wget -nd -P /ciniki/sites/qruqsp.local/site/ciniki-picode -m https://qruqsp.org/ciniki-picode/files.html
+
+#
+# unzip the files, rerun every time to get the latest code
+#
+ls /ciniki/sites/qruqsp.local/site/ciniki-picode/*.zip |sed 's/^\(.*\)\/\([[:alnum:]]\+\).\([[:alnum:]]\+\).zip/unzip -o -d \/ciniki\/sites\/qruqsp.local\/site\/\2-mods\/\3 \1\/\2.\3.zip/' | sh
+
+#
+# Copy the pi-installer.php file
+#
+wget -O /ciniki/sites/qruqsp.local/site/pi-install.php https://raw.githubusercontent.com/QRUQSP/qruqsp/master/site/pi-install.php
+
 # We always want to git pull and git submodule update so that we have the latest updates to the qruqsp code
-echoAndLog "* git pull"
-sudo -u pi git pull /ciniki/sites/qruqsp.local | tee -a /ciniki/logs/qruqsp_setup.txt
-echoAndLog "* git submodule update"
-(cd /ciniki/sites/qruqsp.local && sudo -u pi git submodule update --init /ciniki/sites/qruqsp.local) | tee -a /ciniki/logs/qruqsp_setup.txt
+#echoAndLog "* git pull"
+#sudo -u pi git pull /ciniki/sites/qruqsp.local | tee -a /ciniki/logs/qruqsp_setup.txt
+#echoAndLog "* git submodule update"
+#(cd /ciniki/sites/qruqsp.local && sudo -u pi git submodule update --init /ciniki/sites/qruqsp.local) | tee -a /ciniki/logs/qruqsp_setup.txt
 
 # echoAndLog "* Make sure we have updated qruqsp code using git submodule update --init"
 # (cd /ciniki/sites/qruqsp.local && git submodule update --init) | tee -a /ciniki/logs/qruqsp_setup.txt
@@ -875,16 +885,12 @@ else
     fi
 fi
 
-if [ -d /ciniki/sites/qruqsp.local/.git ]
-then
-    echoAndLog "OK: /ciniki/sites/qruqsp.local/.git exists"
-else
-    echoAndLog "* FIXME: Do we want to automate the steps below and if so what values should be entered in run.ini?"
-    echoAndLog "* WARNING: /ciniki/sites/qruqsp.local/.git does not exist"
-    echoAndLog "Copy /ciniki/sites/qruqsp.local/dev-tools/run.ini.default /ciniki/sites/qruqsp.local/run.ini and configure with your local settings."
-    echoAndLog "This will allow you to execute ./run.php and see the history of API calls and repeat any calls you want, useful for testing the API."
-    echoAndLog "* FIXME: Turn on the password caching for git so you don't have to enter your github username/password everytime you push. Example usage below:"
-    echoAndLog "    git config --global credential.helper cache"
+#
+# If in prepare mode, setup redirect
+#
+if [[ ${PREPARE_ONLY} -eq 1 ]]; then
+    rm /var/www/html/index.html
+    echo '<?php Header("Location: http://{$_SERVER['HTTP_HOST']}:8080/",301); exit;?>' > /var/www/html/index.php
 fi
 
 # php /ciniki/sites/qruqsp.local/site/qruqsp-install.php

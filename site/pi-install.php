@@ -1819,6 +1819,7 @@ function install($ciniki_root, $modules_dir, $args) {
     $config['ciniki.mail'] = array();
 
     $config['qruqsp.core'] = array();
+    $config['qruqsp.core']['modules_dir'] = dirname($ciniki_root) . '/site/qruqsp-mods';
     $config['qruqsp.core']['log_dir'] = dirname($ciniki_root) . '/logs';
     $config['qruqsp.43392'] = array();
     $config['qruqsp.43392']['listener'] = 'active';
@@ -1858,8 +1859,8 @@ function install($ciniki_root, $modules_dir, $args) {
         if( !file_exists($ciniki_root . "/ciniki-storage") ) {
             mkdir($ciniki_root . "/ciniki-storage");
         }
-        if( !file_exists($ciniki_root . "/ciniki-code") ) {
-            mkdir($ciniki_root . "/ciniki-code");
+        if( !file_exists($ciniki_root . "/ciniki-picode") ) {
+            mkdir($ciniki_root . "/ciniki-picode");
         }
         if( !file_exists($ciniki_root . "/ciniki-lib") ) {
             mkdir($ciniki_root . "/ciniki-lib");
@@ -1871,7 +1872,7 @@ function install($ciniki_root, $modules_dir, $args) {
             if( $remote_zip === false ) {
                 return array('form'=>'yes', 'err'=>'ciniki.installer.202', 'msg'=>"Unable to get {$mod_name}.zip, please check Code URL.}");
             }
-            $zipfilename = $ciniki_root . "/ciniki-code/$mod_name.zip";
+            $zipfilename = $ciniki_root . "/ciniki-picode/$mod_name.zip";
             if( ($bytes = file_put_contents($zipfilename, $remote_zip)) === false ) {
                 return array('form'=>'yes', 'err'=>'ciniki.installer.203', 'msg'=>"Unable to save {$zipfilename}");
             }
@@ -2000,69 +2001,9 @@ function install($ciniki_root, $modules_dir, $args) {
         }
 
         //
-        // Enable modules: bugs, questions for master tenant
-        //
-/*        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
-            . "VALUES ('1', 'ciniki', 'bugs', 1, 'all_customers', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
-        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
-        if( $rc['stat'] != 'ok' ) {
-            ciniki_core_dbTransactionRollback($ciniki, 'core');
-            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
-        }
-        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
-            . "VALUES ('1', 'ciniki', 'web', 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
-        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
-        if( $rc['stat'] != 'ok' ) {
-            ciniki_core_dbTransactionRollback($ciniki, 'core');
-            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
-        } */
-
-        //
         // Enable the QRUQSP modules
         //
-/*        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
-            . "VALUES ('1', 'qruqsp', 'aprs', 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
-        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
-        if( $rc['stat'] != 'ok' ) {
-            ciniki_core_dbTransactionRollback($ciniki, 'core');
-            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
-        } */
-/*        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
-            . "VALUES ('1', 'qruqsp', 'tnc', 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
-        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
-        if( $rc['stat'] != 'ok' ) {
-            ciniki_core_dbTransactionRollback($ciniki, 'core');
-            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
-        }
-        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
-            . "VALUES ('1', 'qruqsp', 'qsn', 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
-        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
-        if( $rc['stat'] != 'ok' ) {
-            ciniki_core_dbTransactionRollback($ciniki, 'core');
-            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
-        }
-        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
-            . "VALUES ('1', 'qruqsp', 'qsl', 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
-        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
-        if( $rc['stat'] != 'ok' ) {
-            ciniki_core_dbTransactionRollback($ciniki, 'core');
-            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
-        }
-        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
-            . "VALUES ('1', 'qruqsp', 'qrz', 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
-        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
-        if( $rc['stat'] != 'ok' ) {
-            ciniki_core_dbTransactionRollback($ciniki, 'core');
-            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
-        } 
-        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
-            . "VALUES ('1', 'qruqsp', 'qny', 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
-        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
-        if( $rc['stat'] != 'ok' ) {
-            ciniki_core_dbTransactionRollback($ciniki, 'core');
-            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
-        } */
-        foreach(['43392', 'i2c', 'weather', 'tnc', 'aprs', 'dashboard'] as $module) {
+        foreach(['aprs', '43392', 'i2c', 'weather', 'tnc', 'dashboard'] as $module) {
             $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
                 . "VALUES ('1', 'qruqsp', '" . $module . "', 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
             $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
@@ -2071,33 +2012,6 @@ function install($ciniki_root, $modules_dir, $args) {
                 return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
             }
         }
-
-//        $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
-//            . "VALUES ('1', 'ciniki', 'questions', 1, 'all_customers', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
-//        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
-//        if( $rc['stat'] != 'ok' ) {
-//            ciniki_core_dbTransactionRollback($ciniki, 'core');
-//            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
-//        }
-
-        //
-        // Setup notification settings
-        //
-        $strsql = "INSERT INTO ciniki_bug_settings (tnid, detail_key, detail_value, date_added, last_updated) "
-            . "VALUES ('1', 'add.notify.owners', 'yes', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
-        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'bugs');
-        if( $rc['stat'] != 'ok' ) {
-            ciniki_core_dbTransactionRollback($ciniki, 'core');
-            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
-        }
-
-//        $strsql = "INSERT INTO ciniki_question_settings (tnid, detail_key, detail_value, date_added, last_updated) "
-//            . "VALUES ('1', 'add.notify.owners', 'yes', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
-//        $rc = ciniki_core_dbInsert($ciniki, $strsql, 'questions');
-//        if( $rc['stat'] != 'ok' ) {
-//            ciniki_core_dbTransactionRollback($ciniki, 'core');
-//            return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
-//        }
 
         //
         // Add the api key for the UI
@@ -2111,6 +2025,14 @@ function install($ciniki_root, $modules_dir, $args) {
             return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
         }
     }
+
+    //
+    // FIXME: Update password for pi user
+    //
+
+    //
+    // FIXME: Update /etc/hostapd/hostapd.conf
+    //
 
     // 
     // Save ciniki-api config file
@@ -2176,11 +2098,12 @@ function install($ciniki_root, $modules_dir, $args) {
         . "# Force redirect to strip www from front of domain names\n"
         . "RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]\n"
         . "RewriteRule ^(.*)$ http://%1/$1 [R=301,L]\n"
+        . "RewriteRule ^$ http://%1/manager [R=301,L]\n"
         . "# Allow access to artweb themes and cache, everything is considered public\n"
         . "RewriteRule ^ciniki-web-layouts/(.*\.)(css|js|png|eot|ttf|woff|svg)$ ciniki-mods/web/layouts/$1$2 [L]\n"
         . "RewriteRule ^ciniki-web-themes/(.*\.)(css|js|html|png|jpg)$ ciniki-mods/web/themes/$1$2 [L]\n"
         . "RewriteRule ^ciniki-web-cache/(.*\.)(css|js|gif|jpg|png|mp3|ogg|wav)$ ciniki-mods/web/cache/$1$2 [L]\n"
-        . "RewriteRule ^ciniki-code/(.*\.)(zip|ini)$ ciniki-code/$1$2 [L]\n"
+        . "RewriteRule ^ciniki-picode/(.*\.)(zip|ini)$ ciniki-picode/$1$2 [L]\n"
         . "RewriteBase /\n"
         . "\n"
         . "AddType text/cache-manifest .manifest\n"
