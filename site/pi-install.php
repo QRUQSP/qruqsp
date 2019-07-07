@@ -167,10 +167,10 @@ else {
             'admin_firstname' => $_POST['first'],
             'admin_lastname' => $_POST['last'],
             'admin_display_name' => strtoupper($_POST['callsign']),
-            'master_name' => strtoupper($_POST['callsign']),
+            'master_name' => strtoupper($_POST['callsign']) . (isset($_POST['ssid']) && $_POST['ssid'] != '' ? '-' . $_POST['ssid'] : ''),
             'system_email' => $_POST['email'],
             'system_email_name' => $_POST['callsign'],
-            'sync_code_url' => '',
+            'sync_code_url' => 'https://qruqsp.org/ciniki-picode',
             'server_name' => $_SERVER['SERVER_NAME'],
             'request_uri' => $_SERVER['REQUEST_URI'],
             'http_host' => $_SERVER['HTTP_HOST'],
@@ -1706,6 +1706,8 @@ table.list > tbody > tr.followup > td.content {
                                 <td class="input"><input type="email" id="email" name="email" /></td></tr>
                             <tr class="textfield"><td class="label"><label for="callsign">Callsign</label></td>
                                 <td class="input"><input type="text" id="callsign" name="callsign" /></td></tr>
+                            <tr class="textfield"><td class="label"><label for="ssid">SSID</label></td>
+                                <td class="input"><input type="text" id="ssid" name="ssid" /></td></tr>
                             <tr class="textfield"><td class="label"><label for="password">Password</label></td>
                                 <td class="input"><input type="password" id="password" name="password" /></td></tr>
                             </tbody>
@@ -1899,19 +1901,19 @@ function install($ciniki_root, $modules_dir, $args) {
     // Check if this pi was setup in "Black Box" mode giving it full control of the pi
     // Change the pi users password along with hostapd passwod
     //
-    error_log('Checking for ' . dirname($ciniki_root) . '/.blackbox');
     if( file_exists(dirname($ciniki_root) . '/.blackbox') ) {
-        error_log('found blackbox');
         if( isset($admin_password) && $admin_password != '' ) {
-            error_log('hash pwd');
+            //
+            // Change the system password for the pi user
+            //
             $hashed_pwd = trim(`echo $admin_password | openssl passwd -6 -stdin`);
             if( $hashed_pwd != '' ) {
                 `sudo usermod --pass='$hashed_pwd' pi`;
             }
-            error_log('password hash: ' . $hashed_pwd);
             //
-            // Update /etc/hostapd/hostapd.conf
+            // Update wifi hotspot SSID & password in /etc/hostapd/hostapd.conf
             //
+            `sudo sed -i 's/ssid=QRUQSP/ssid=$master_name/' /etc/hostapd/hostapd.conf`;
             `sudo sed -i 's/wpa_passphrase=hamradio/wpa_passphrase=$admin_password/' /etc/hostapd/hostapd.conf`;
         }
     }
