@@ -1776,7 +1776,7 @@ function install($ciniki_root, $modules_dir, $args) {
     $config['ciniki.core']["database.$database_name.password"] = $database_password;
     $config['ciniki.core']["database.$database_name.database"] = $database_name;
 
-    // The master tenantn ID will be set later on, once information is in database
+    // The master tenant ID will be set later on, once information is in database
     $config['ciniki.core']['master_tnid'] = 0;
     $config['ciniki.core']['qruqsp_tnid'] = 0;
 
@@ -1892,6 +1892,27 @@ function install($ciniki_root, $modules_dir, $args) {
             } else {
                 return array('form'=>'yes', 'err'=>'ciniki.installer.205', 'msg'=>"Unable to open {$mod_name}.zip");
             }
+        }
+    }
+
+    //
+    // Check if this pi was setup in "Black Box" mode giving it full control of the pi
+    // Change the pi users password along with hostapd passwod
+    //
+    error_log('Checking for ' . dirname($ciniki_root) . '/.blackbox');
+    if( file_exists(dirname($ciniki_root) . '/.blackbox') ) {
+        error_log('found blackbox');
+        if( isset($admin_password) && $admin_password != '' ) {
+            error_log('hash pwd');
+            $hashed_pwd = trim(`echo $admin_password | openssl passwd -6 -stdin`);
+            if( $hashed_pwd != '' ) {
+                `sudo usermod --pass='$hashed_pwd' pi`;
+            }
+            error_log('password hash: ' . $hashed_pwd);
+            //
+            // Update /etc/hostapd/hostapd.conf
+            //
+            `sudo sed -i 's/wpa_passphrase=hamradio/wpa_passphrase=$admin_password/' /etc/hostapd/hostapd.conf`;
         }
     }
 
@@ -2025,14 +2046,6 @@ function install($ciniki_root, $modules_dir, $args) {
             return array('form'=>'yes', 'err'=>'ciniki.' . $rc['err']['code'], 'msg'=>"Failed to setup database<br/><br/>" . $rc['err']['msg']);
         }
     }
-
-    //
-    // FIXME: Update password for pi user
-    //
-
-    //
-    // FIXME: Update /etc/hostapd/hostapd.conf
-    //
 
     // 
     // Save ciniki-api config file

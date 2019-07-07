@@ -785,6 +785,13 @@ ls /ciniki/sites/qruqsp.local/site/ciniki-picode/*.zip |sed 's/^\(.*\)\/\([[:aln
 #
 wget -O /ciniki/sites/qruqsp.local/site/pi-install.php https://raw.githubusercontent.com/QRUQSP/qruqsp/master/site/pi-install.php
 
+#
+# Setup black box mode, giving UI full control over pi functions
+#
+if [[ ${PREPARE_ONLY} -eq 1 ]]; then
+    echo "this file enables qruqsp ui to have full control over pi" >/ciniki/sites/qruqsp.local/.blackbox
+fi
+
 # We always want to git pull and git submodule update so that we have the latest updates to the qruqsp code
 #echoAndLog "* git pull"
 #sudo -u pi git pull /ciniki/sites/qruqsp.local | tee -a /ciniki/logs/qruqsp_setup.txt
@@ -930,8 +937,8 @@ else
     sudo -u pi crontab -l > /tmp/cinikicron
     echo "*/5 * * * * /usr/bin/php /ciniki/sites/qruqsp.local/site/ciniki-mods/cron/scripts/cron.php ciniki.mail >>/ciniki/sites/qruqsp.local/logs/cron.log 2>&1" >> /tmp/cinikicron
     echo "*/5 * * * * /usr/bin/php /ciniki/sites/qruqsp.local/site/ciniki-mods/cron/scripts/cron.php -ignore ciniki.mail >>/ciniki/sites/qruqsp.local/logs/cron.log 2>&1" >> /tmp/cinikicron
-    echo "* * * * * /usr/bin/php /ciniki/sites/qruqsp.local/site/ciniki-mods/tnc/scripts/check.php >>/ciniki/sites/qruqsp.local/logs/cron.log 2>&1" >> /tmp/cinikicron
-    echo "* * * * * /usr/bin/php /ciniki/sites/qruqsp.local/site/ciniki-mods/i2c/scripts/poll.php >>/ciniki/sites/qruqsp.local/logs/i2c.log 2>&1" >> /tmp/cinikicron
+    echo "* * * * * /usr/bin/php /ciniki/sites/qruqsp.local/site/qruqsp-mods/tnc/scripts/check.php >>/ciniki/sites/qruqsp.local/logs/cron.log 2>&1" >> /tmp/cinikicron
+    echo "* * * * * /usr/bin/php /ciniki/sites/qruqsp.local/site/qruqsp-mods/i2c/scripts/poll.php >>/ciniki/sites/qruqsp.local/logs/i2c.log 2>&1" >> /tmp/cinikicron
     sudo -u pi crontab /tmp/cinikicron
     rm /tmp/cinikicron
 fi
