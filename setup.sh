@@ -748,6 +748,13 @@ else
 fi
 
 #
+# Setup /etc/hostname to be qruqsp
+#
+if [[ ${PREPARE_ONLY} -eq 1 ]]; then
+    echo "qruqsp" >/etc/hostname
+fi
+
+#
 # Setup the directory structure and get the latest pi code
 #
 for needDir in /ciniki/sites/qruqsp.local /ciniki/sites/qruqsp.local/site /ciniki/sites/qruqsp.local/logs /ciniki/sites/qruqsp.local/site/ciniki-mods /ciniki/sites/qruqsp.local/site/qruqsp-mods /ciniki/sites/qruqsp.local/site/ciniki-cache /ciniki/sites/qruqsp.local/site/ciniki-storage /ciniki/sites/qruqsp.local/site/ciniki-picode
