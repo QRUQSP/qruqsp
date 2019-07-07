@@ -97,3 +97,6 @@
 [submodule "site/qruqsp-mods/tutorials"]
 	path = site/qruqsp-mods/tutorials
 	url = https://github.com/qruqsp/tutorials
+[submodule "site/qruqsp-mods/piadmin"]
+	path = site/qruqsp-mods/piadmin
+	url = https://github.com/QRUQSP/piadmin
