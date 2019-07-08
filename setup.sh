@@ -731,7 +731,7 @@ else
 fi
 
 echoAndLog "Install Apache and PHP if not already installed"
-apt-get -y install apache2 php-xml php-imagick php-intl php-curl php-mysql php-json php-readline php-imap libapache2-mod-php | tee -a /ciniki/logs/qruqsp_setup.txt
+apt-get -y install apache2 php-xml php-imagick php-intl php-zip php-curl php-mysql php-json php-readline php-imap libapache2-mod-php | tee -a /ciniki/logs/qruqsp_setup.txt
 
 if [ `egrep -c '127.0.1.1\s+qruqsp.local\s+qruqsp' /etc/hosts` == "1" ]
 then
