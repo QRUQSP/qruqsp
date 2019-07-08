@@ -1763,6 +1763,7 @@ function install($ciniki_root, $modules_dir, $args) {
     $config['ciniki.core']['storage_dir'] = $ciniki_root . '/ciniki-storage';
     $config['ciniki.core']['cache_dir'] = $ciniki_root . '/ciniki-cache';
     $config['ciniki.core']['backup_dir'] = $ciniki_root . '/ciniki-backups';
+    $config['ciniki.core']['code_dir'] = $ciniki_root . '/ciniki-picode';
 
     // Default session timeout to 7 days 
     $config['ciniki.core']['session_timeout'] = 604800;
@@ -1915,6 +1916,7 @@ function install($ciniki_root, $modules_dir, $args) {
             //
             `sudo sed -i 's/ssid=QRUQSP/ssid=$master_name/' /etc/hostapd/hostapd.conf`;
             `sudo sed -i 's/wpa_passphrase=hamradio/wpa_passphrase=$admin_password/' /etc/hostapd/hostapd.conf`;
+            `sudo service hostapd restart`;
         }
     }
 

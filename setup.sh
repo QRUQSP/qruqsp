@@ -773,17 +773,17 @@ done
 #
 # Mirror the latest code from ciniki-picode directory at qruqsp.org
 #
-wget -nd -P /ciniki/sites/qruqsp.local/site/ciniki-picode -m https://qruqsp.org/ciniki-picode/files.html
+sudo -u pi wget -nd -P /ciniki/sites/qruqsp.local/site/ciniki-picode -m https://qruqsp.org/ciniki-picode/files.html
 
 #
 # unzip the files, rerun every time to get the latest code
 #
-ls /ciniki/sites/qruqsp.local/site/ciniki-picode/*.zip |sed 's/^\(.*\)\/\([[:alnum:]]\+\).\([[:alnum:]]\+\).zip/unzip -o -d \/ciniki\/sites\/qruqsp.local\/site\/\2-mods\/\3 \1\/\2.\3.zip/' | sh
+sudo -u pi ls /ciniki/sites/qruqsp.local/site/ciniki-picode/*.zip |sed 's/^\(.*\)\/\([[:alnum:]]\+\).\([[:alnum:]]\+\).zip/unzip -o -d \/ciniki\/sites\/qruqsp.local\/site\/\2-mods\/\3 \1\/\2.\3.zip/' | sh
 
 #
 # Copy the pi-installer.php file
 #
-wget -O /ciniki/sites/qruqsp.local/site/pi-install.php https://raw.githubusercontent.com/QRUQSP/qruqsp/master/site/pi-install.php
+sudo -u pi wget -O /ciniki/sites/qruqsp.local/site/pi-install.php https://raw.githubusercontent.com/QRUQSP/qruqsp/master/site/pi-install.php
 
 #
 # Setup black box mode, giving UI full control over pi functions
