@@ -2028,7 +2028,7 @@ function install($ciniki_root, $modules_dir, $args) {
         //
         // Enable the QRUQSP modules
         //
-        foreach(['aprs', '43392', 'i2c', 'weather', 'tnc', 'dashboard'] as $module) {
+        foreach(['aprs', '43392', 'i2c', 'weather', 'tnc', 'dashboard', 'piadmin'] as $module) {
             $strsql = "INSERT INTO ciniki_tenant_modules (tnid, package, module, status, ruleset, date_added, last_updated) "
                 . "VALUES ('1', 'qruqsp', '" . $module . "', 1, '', UTC_TIMESTAMP(), UTC_TIMESTAMP())";
             $rc = ciniki_core_dbInsert($ciniki, $strsql, 'tenants');
