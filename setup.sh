@@ -378,7 +378,7 @@ apt-get -y install libasound2-dev | tee -a /ciniki/logs/qruqsp_setup.txt
 echoAndLog "Download Dire Wolf source code from github"
 # Follow these steps to clone the git repository and checkout the desired version.
 # cd ~
-for needDir in /ciniki/logs /ciniki/bin /ciniki/db/mysql /ciniki/src/direwolf /ciniki/src/hamlib /ciniki/sites /ciniki/apache-sites-enabled
+for needDir in /ciniki/logs /ciniki/bin /ciniki/db /ciniki/src/direwolf /ciniki/src/hamlib /ciniki/sites /ciniki/apache-sites-enabled
 do
     if [ -d ${needDir} ]
     then
@@ -587,6 +587,15 @@ echoAndLog "RTL-SDR Library from http://sdr.osmocom.org/trac/wiki/rtl-sdr"
 apt-get -y update | tee -a /ciniki/logs/qruqsp_setup.txt
 apt-get -y install cmake build-essential libusb-1.0-0-dev | tee -a /ciniki/logs/qruqsp_setup.txt
 
+#
+# Make sure gpsd is installed
+#
+echoAndLog "Make sure gpsd is installed"
+apt-get -y install gpsd
+
+#
+# Install rtl-sdr software
+#
 if [ -d /ciniki/src/rtl-sdr/cmake ]
 then
     echoAndLog "OK: It appears that we already did git clone rtl-sdr"
@@ -632,21 +641,23 @@ apt-get -y install mariadb-server | tee -a /ciniki/logs/qruqsp_setup.txt
 
 checkFiles /etc/mysql/my.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
 
-# FIXME: This is may not be working correctly on ANdrew's Pi. Andrew has more than one sql_mode = entry in his my.cnf
-sqlMode=`egrep -c 'sql_mode\s+=\s+ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' /etc/mysql/my.cnf`
-if [ "${sqlMode}X" == "1X" ]
-then
-    echoAndLog "OK: /etc/mysql/my.cnf contains the sql_mode settings that are required."
-else
-    datetime=`date "+%Y-%m-%d_%H%M%S"`
-    echoAndLog "* Making a backup of /etc/mysql/my.cnf into /etc/mysql/my.cnf.backup-${datetime}"
-    cp -p /etc/mysql/my.cnf /etc/mysql/my.cnf.backup-${datetime}
-    echoAndLog "* Update /etc/mysql/my.cnf with the sql_mode settings that are required."
-    echo " " > /tmp/mysql_conf_ending
-    echo "[mysqld]" >> /tmp/mysql_conf_ending
-    echo "sql_mode = ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION" >> /tmp/mysql_conf_ending
-    cat /etc/mysql/my.cnf.backup-${datetime} /tmp/mysql_conf_ending > /etc/mysql/my.cnf
-fi
+##
+## FIXME: This is may not be working correctly on ANdrew's Pi. Andrew has more than one sql_mode = entry in his my.cnf
+##sqlMode=`egrep -c 'sql_mode\s+=\s+ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' /etc/mysql/my.cnf`
+##if [ "${sqlMode}X" == "1X" ]
+##then
+##    echoAndLog "OK: /etc/mysql/my.cnf contains the sql_mode settings that are required."
+##else
+##    datetime=`date "+%Y-%m-%d_%H%M%S"`
+##    echoAndLog "* Making a backup of /etc/mysql/my.cnf into /etc/mysql/my.cnf.backup-${datetime}"
+##    cp -p /etc/mysql/my.cnf /etc/mysql/my.cnf.backup-${datetime}
+##    echoAndLog "* Update /etc/mysql/my.cnf with the sql_mode settings that are required."
+##    echo " " > /tmp/mysql_conf_ending
+##    echo "[mysqld]" >> /tmp/mysql_conf_ending
+##    echo "sql_mode = ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION" >> /tmp/mysql_conf_ending
+##    echo "datadir = /ciniki/db/mysql" >> /tmp/mysql_conf_ending
+##    cat /etc/mysql/my.cnf.backup-${datetime} /tmp/mysql_conf_ending > /etc/mysql/my.cnf
+##fi
 
 if [ -f /home/pi/.my.cnf ]
 then
@@ -703,13 +714,21 @@ else
 #    echo "innodb_file_format = barracuda" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
 #    echo "innodb_file_format_max = barracuda" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
     echo "innodb_file_per_table = 1" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
-    echo "# sql_mode = \"NO_ENGINE_SUBSTITUTION\"" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+#    echo "# sql_mode = \"NO_ENGINE_SUBSTITUTION\"" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
     echo "character-set-server = latin1" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
     echo "collation-server = latin1_general_ci" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+    echo "sql_mode = ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+    if [[ ${PREPARE_ONLY} -eq 1 ]]; then
+        echo "datadir = /ciniki/db/mysql" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
+    fi
     echo "" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
     echo "[client]" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
     echo "default-character-set = latin1" >> /etc/mysql/mariadb.conf.d/51-ciniki.cnf
-    service mysql restart | tee -a /ciniki/logs/qruqsp_setup.txt
+    service mariadb stop | tee -a /ciniki/logs/qruqsp_setup.txt
+    if [[ ${PREPARE_ONLY} -eq 1 ]]; then
+        mv /var/lib/mysql /ciniki/db/
+    fi
+    service mariadb start | tee -a /ciniki/logs/qruqsp_setup.txt
 fi
 
 echoAndLog "Checking for qruqsp database..."
