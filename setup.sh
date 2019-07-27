@@ -232,6 +232,29 @@ echoAndLog "master_name=${master_name}"
 server_name=`ifconfig|awk '/inet / {if ($2 !~ "127.0.0.1") {print $2} }'|head -1`
 echoAndLog "server_name=${server_name}"
 
+# JUST_CHECK=1 will prevent rpi-update from actually updating anything and it will just get a list of commits contained in rpi-update since you last updated
+JUST_CHECK=1
+FIRMWARE=`rpi-update`
+if [ $? -eq 2 ]
+then
+    echoAndLog "* WARNING: firmware is not up to date. rpi-update returned the following updates are recommended:"
+    echoAndLog "${FIRMWARE}"
+    echoAndLog "Press enter to update the firmware and reboot. Otherwise press any key followed by enter to skip firware update."
+    read yes
+    if [ "${yes}X" == "X" ]
+    then
+        JUST_CHECK=0
+        rpi-update
+        echoAndLog "Press enter to reboot. Then re-run ${0} to continue setup."
+        read reboot
+        reboot
+    else
+        echoAndLog "* WARNING: Skipping firmware update. This is not recommended but we will continue anyway and see what happens"
+    fi
+else
+    echoAndLog "OK: The firmware is up to date"
+fi
+
 echoAndLog "Checking if ssh is active and running..."
 /bin/systemctl status ssh
 sshActive=`/bin/systemctl status ssh | /usr/bin/awk '/Active/ {print $2}'`
@@ -346,29 +369,6 @@ apt-get -y autoremove
 rm -rf /home/pi/.pulse
 
 echoAndLog "Checking if Pi firmware is up to date..."
-
-# JUST_CHECK=1 will prevent rpi-update from actually updating anything and it will just get a list of commits contained in rpi-update since you last updated
-JUST_CHECK=1
-FIRMWARE=`rpi-update`
-if [ $? -eq 2 ]
-then
-    echoAndLog "* WARNING: firmware is not up to date. rpi-update returned the following updates are recommended:"
-    echoAndLog "${FIRMWARE}"
-    echoAndLog "Press enter to update the firmware and reboot. Otherwise press any key followed by enter to skip firware update."
-    read yes
-    if [ "${yes}X" == "X" ]
-    then
-        JUST_CHECK=0
-        rpi-update
-        echoAndLog "Press enter to reboot. Then re-run ${0} to continue setup."
-        read reboot
-        reboot
-    else
-        echoAndLog "* WARNING: Skipping firmware update. This is not recommended but we will continue anyway and see what happens"
-    fi
-else
-    echoAndLog "OK: The firmware is up to date"
-fi
 
 # Install sound library.
 echoAndLog "* Install the \"libasound2-dev\" package"
