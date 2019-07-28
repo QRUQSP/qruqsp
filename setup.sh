@@ -1006,6 +1006,9 @@ if [[ ${PREPARE_ONLY} -eq 1 ]]; then
     if [ "${DNSMASQ}X" == "0X" ]
     then
         echoAndLog "Setup /etc/dnsmasq.conf file"
+        # Remove dhcp-mac, dhcp-reply
+        sed -i 's/^dhcp-mac/#dhcp-mac/g' /etc/dnsmasq.conf
+        sed -i 's/^dhcp-reply/#dhcp-mac/g' /etc/dnsmasq.conf
         echo "interface=wlan0" >> /etc/dnsmasq.conf
         echo "domain-needed" >> /etc/dnsmasq.conf
         echo "bogus-priv" >> /etc/dnsmasq.conf
