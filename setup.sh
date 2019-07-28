@@ -1002,14 +1002,14 @@ if [[ ${PREPARE_ONLY} -eq 1 ]]; then
     fi
 
     # Setup the /etc/dnsmasq/dnsmasq.conf file
-    DNSMASQ=`egrep -c "^[^#]*dhcp-range=" /etc/dnsmasq/dnsmasq.conf`;
+    DNSMASQ=`egrep -c "^[^#]+dhcp-range=" /etc/dnsmasq.conf`;
     if [ "${DNSMASQ}X" == "0X" ]
     then
-        echoAndLog "Setup /etc/dnsmasq/dnsmasq.conf file"
-        echo "interface=wlan0" >> /etc/dnsmasq/dnsmasq.conf
-        echo "domain-needed" >> /etc/dnsmasq/dnsmasq.conf
-        echo "bogus-priv" >> /etc/dnsmasq/dnsmasq.conf
-        echo "dhcp-range=10.99.1.50,10.99.1.250,255.255.255.0,24h" >> /etc/dnsmasq/dnsmasq.conf
+        echoAndLog "Setup /etc/dnsmasq.conf file"
+        echo "interface=wlan0" >> /etc/dnsmasq.conf
+        echo "domain-needed" >> /etc/dnsmasq.conf
+        echo "bogus-priv" >> /etc/dnsmasq.conf
+        echo "dhcp-range=10.99.1.50,10.99.1.250,255.255.255.0,24h" >> /etc/dnsmasq.conf
     fi
 
     # Check for /etc/dhcpcd.conf setup
