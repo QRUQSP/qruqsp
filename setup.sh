@@ -919,7 +919,7 @@ fi
 #
 if [[ ${PREPARE_ONLY} -eq 1 ]]; then
     rm /var/www/html/index.html
-    echo '<?php Header("Location: http://{$_SERVER['HTTP_HOST']}:8080/",301); exit;?>' > /var/www/html/index.php
+    echo "<?php Header(\"Location: http://{\$_SERVER['HTTP_HOST']}:8080/\",301); exit;?>" > /var/www/html/index.php
 fi
 
 # php /ciniki/sites/qruqsp.local/site/qruqsp-install.php
