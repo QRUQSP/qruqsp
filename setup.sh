@@ -675,8 +675,8 @@ chown pi:pi /home/pi/.my.cnf | tee -a /ciniki/logs/qruqsp_setup.txt
 chmod 700 /home/pi/.my.cnf | tee -a /ciniki/logs/qruqsp_setup.txt
 echoAndLog "FIXME: It seems that Raspbian stretch switched from mysql to MariaDB and /home/pi/.my.cnf no longer works as it did with mysql. We wil have to run mysql commands as root nutil we figure this out."
 # check that innodb_* and sql_mode settings have been added to /etc/mysql/mariadb.conf.d/50-server.cnf
-innodbOptions=`egrep -c 'default-character-set = latin1|innodb_large_prefix = 1|innodb_file_format = barracuda|innodb_file_format_max = barracuda|innodb_file_per_table = 1|character-set-server = latin1|collation-server = latin1_general_ci|default-character-set = latin1' /etc/mysql/mariadb.conf.d/51-ciniki.cnf`
-if [ "${innodbOptions}X" == "8X" ]
+innodbOptions=`egrep -c 'default-character-set = latin1|innodb_file_per_table = 1|character-set-server = latin1|collation-server = latin1_general_ci|default-character-set = latin1' /etc/mysql/mariadb.conf.d/51-ciniki.cnf`
+if [ "${innodbOptions}X" == "4X" ]
 then
     echoAndLog "OK: /etc/mysql/mariadb.conf.d/51-ciniki.cnf contains ${innodbOptions} of 8 of the innodb_* and sql_mode settings that are required."
 else
