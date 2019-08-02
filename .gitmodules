@@ -100,3 +100,6 @@
 [submodule "site/qruqsp-mods/piadmin"]
 	path = site/qruqsp-mods/piadmin
 	url = https://github.com/QRUQSP/piadmin
+[submodule "site/ciniki-mods/sapos"]
+	path = site/ciniki-mods/sapos
+	url = https://github.com/ciniki/sapos
