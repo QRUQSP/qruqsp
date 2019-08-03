@@ -19,6 +19,7 @@ site/ciniki-storage
 site/customer-mods
 site/loginactions.js
 site/ciniki-lib/PHPWord
+site/qruqsp-mods/core/ui/themes/default/img/stripe_checkout.jpg
 logs/
 dev-tools
 run.sh
@@ -28,6 +29,3 @@ run.sh
 _version.ini
 site/_versions.ini
 commit.sh
-
-# Modules in development
-site/ciniki-mods/tradealerts
