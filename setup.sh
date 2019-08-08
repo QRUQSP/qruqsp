@@ -957,6 +957,7 @@ else
     echo "*/5 * * * * /usr/bin/php /ciniki/sites/qruqsp.local/site/ciniki-mods/cron/scripts/cron.php ciniki.mail >>/ciniki/sites/qruqsp.local/logs/cron.log 2>&1" >> /tmp/cinikicron
     echo "*/5 * * * * /usr/bin/php /ciniki/sites/qruqsp.local/site/ciniki-mods/cron/scripts/cron.php -ignore ciniki.mail >>/ciniki/sites/qruqsp.local/logs/cron.log 2>&1" >> /tmp/cinikicron
     echo "* * * * * /usr/bin/php /ciniki/sites/qruqsp.local/site/qruqsp-mods/tnc/scripts/check.php >>/ciniki/sites/qruqsp.local/logs/cron.log 2>&1" >> /tmp/cinikicron
+    echo "* * * * * /usr/bin/php /ciniki/sites/qruqsp.local/site/qruqsp-mods/43392/scripts/check.php >>/ciniki/sites/qruqsp.local/logs/cron.log 2>&1" >> /tmp/cinikicron
     echo "* * * * * /usr/bin/php /ciniki/sites/qruqsp.local/site/qruqsp-mods/i2c/scripts/poll.php >>/ciniki/sites/qruqsp.local/logs/i2c.log 2>&1" >> /tmp/cinikicron
     echo "1 0 1 * * /bin/bash /ciniki/sites/qruqsp.local/site/qruqsp-mods/piadmin/scripts/roll_apache_logs.sh >>/ciniki/sites/qruqsp.local/logs/cron.log 2>&1" >> /tmp/cinikicron
     sudo -u pi crontab /tmp/cinikicron
