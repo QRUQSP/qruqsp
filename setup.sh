@@ -460,12 +460,11 @@ fi
 echoAndLog "Chown pi:pi /home/pi/.my.cnf and chmod 700 /home/pi/.my.cnf just in case it is not set correctly"
 chown pi:pi /home/pi/.my.cnf | tee -a /ciniki/logs/qruqsp_setup.txt
 chmod 700 /home/pi/.my.cnf | tee -a /ciniki/logs/qruqsp_setup.txt
-echoAndLog "FIXME: It seems that Raspbian stretch switched from mysql to MariaDB and /home/pi/.my.cnf no longer works as it did with mysql. We wil have to run mysql commands as root nutil we figure this out."
-# check that innodb_* and sql_mode settings have been added to /etc/mysql/mariadb.conf.d/50-server.cnf
+# check that innodb_* and sql_mode settings have been added to /etc/mysql/mariadb.conf.d/51-ciniki.cnf
 innodbOptions=`egrep -c 'default-character-set = latin1|innodb_file_per_table = 1|character-set-server = latin1|collation-server = latin1_general_ci|default-character-set = latin1' /etc/mysql/mariadb.conf.d/51-ciniki.cnf`
-if [ "${innodbOptions}X" == "4X" ]
+if [ "${innodbOptions}X" == "5X" ]
 then
-    echoAndLog "OK: /etc/mysql/mariadb.conf.d/51-ciniki.cnf contains ${innodbOptions} of 8 of the innodb_* and sql_mode settings that are required."
+    echoAndLog "OK: /etc/mysql/mariadb.conf.d/51-ciniki.cnf contains ${innodbOptions} of 5 of the innodb_* and sql_mode settings that are required."
 else
     echoAndLog "*** UNEXPECTED: /etc/mysql/mariadb.conf.d/51-ciniki.cnf CONTAINS ONLY ${innodbOptions} of 8 of the innodb_* and sql_mode settings that are required."
     TODO="${TODO}\n *** UNEXPECTED: /etc/mysql/mariadb.conf.d/51-ciniki.cnf CONTAINS ONLY ${innodbOptions} of 8 of the innodb_* and sql_mode settings that are required."
