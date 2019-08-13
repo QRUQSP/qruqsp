@@ -103,3 +103,6 @@
 [submodule "site/ciniki-mods/sapos"]
 	path = site/ciniki-mods/sapos
 	url = https://github.com/ciniki/sapos
+[submodule "site/qruqsp-mods/pibin"]
+	path = site/qruqsp-mods/pibin
+	url = https://github.com/QRUQSP/pibin

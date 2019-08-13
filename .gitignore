@@ -19,6 +19,7 @@ site/ciniki-storage
 site/customer-mods
 site/loginactions.js
 site/ciniki-lib/PHPWord
+site/qruqsp-dashboard.php
 site/qruqsp-mods/core/ui/themes/default/img/stripe_checkout.jpg
 logs/
 dev-tools
