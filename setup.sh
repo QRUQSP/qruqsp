@@ -466,8 +466,8 @@ if [ "${innodbOptions}X" == "5X" ]
 then
     echoAndLog "OK: /etc/mysql/mariadb.conf.d/51-ciniki.cnf contains ${innodbOptions} of 5 of the innodb_* and sql_mode settings that are required."
 else
-    echoAndLog "*** UNEXPECTED: /etc/mysql/mariadb.conf.d/51-ciniki.cnf CONTAINS ONLY ${innodbOptions} of 8 of the innodb_* and sql_mode settings that are required."
-    TODO="${TODO}\n *** UNEXPECTED: /etc/mysql/mariadb.conf.d/51-ciniki.cnf CONTAINS ONLY ${innodbOptions} of 8 of the innodb_* and sql_mode settings that are required."
+    echoAndLog "*** UNEXPECTED: /etc/mysql/mariadb.conf.d/51-ciniki.cnf CONTAINS ONLY ${innodbOptions} of 5 of the innodb_* and sql_mode settings that are required."
+    TODO="${TODO}\n *** UNEXPECTED: /etc/mysql/mariadb.conf.d/51-ciniki.cnf CONTAINS ONLY ${innodbOptions} of 5 of the innodb_* and sql_mode settings that are required."
     echoAndLog "*** Deleting and recreating /etc/mysql/mariadb.conf.d/51-ciniki.cnf"
     rm /etc/mysql/mariadb.conf.d/51-ciniki.cnf
 #     datetime=`date "+%Y-%m-%d_%H%M%S"`
@@ -557,6 +557,7 @@ fi
 #
 if [[ ${PREPARE_ONLY} -eq 1 ]]; then
     echo "qruqsp" >/etc/hostname
+    echo "Etc/UTC" >/etc/timezone
 fi
 
 #
@@ -839,6 +840,9 @@ fi
 
 echoAndLog "Install lshw if not installed already"
 apt-get -y install lshw
+
+echoAndLog "Install i2c-tools if not installed already"
+apt-get -y install i2c-tools python-smbus
 
 #
 # The dtparam=i2c_arm=on should be commented out. The i2c is setup
