@@ -375,10 +375,10 @@ echoAndLog "* Install the \"libasound2-dev\" package"
 apt-get -y install libasound2-dev | tee -a /ciniki/logs/qruqsp_setup.txt
 # Failure to install libasound2-dev step will result in a compile error resembling “audio.c:...: fatal error: alsa/asoundlib.h: No such file or directory”
 
-echoAndLog "Download Dire Wolf source code from github"
+# echoAndLog "Download Dire Wolf source code from github"
 # Follow these steps to clone the git repository and checkout the desired version.
 # cd ~
-for needDir in /ciniki/logs /ciniki/bin /ciniki/db /ciniki/src/direwolf /ciniki/src/hamlib /ciniki/sites /ciniki/apache-sites-enabled
+for needDir in /ciniki/logs /ciniki/bin /ciniki/db /ciniki/sites /ciniki/apache-sites-enabled
 do
     if [ -d ${needDir} ]
     then
@@ -391,34 +391,6 @@ do
     fi
 done
 
-if [ -f /ciniki/src/direwolf/Makefile ]
-then
-    echoAndLog "It looks like we have already pulled direwolf from github"
-else
-    echoAndLog "* git clone direwolf"
-    git clone https://www.github.com/wb2osz/direwolf /ciniki/src/direwolf | tee -a /ciniki/logs/qruqsp_setup.txt
-fi
-
-# At this pint you should have the most recent stable version which is probably what you want in most cases. 
-# There are times when you might want to get a specific older version. To get a list of them, type:
-#   git tag
-# You should see a list of releases and development snapshots, something like this:
-    # 1.0
-    # 1.1
-    # 1.2
-    # 1.3-beta
-    # 1.3-dev-F
-    # 1.3-dev-I
-    # 1.3-dev-K
-    # 1.4-dev-D
-    # 1.4-dev-E
-# To select a specific version, specify the tag like this:
-#   git checkout 1.3
-# In some cases, you might want the latest (sometimes unstable) development version to test a bug fix or get a preview of a new (possibly incomplete) feature that will be in the next release. In that case, type:
-#   git checkout dev
-
-# Optional support for hamlib
-# Skip this step if you don’t want to use “hamlib.”
 # Build from source because a Raspbian package doesn’t seem to be available. Here is my “cheat sheet” version boiled down from http://hamlib.sourceforge.net/manuals/1.2.15/_rdmedevel.html
 echoAndLog "Install built tools if not already installed..."
     apt-get -y install automake libtool texinfo
@@ -429,156 +401,6 @@ echoAndLog "Install built tools if not already installed..."
     # git clone https://github.com/N0NB/hamlib /ciniki/src/hamlib
     # Above results in no ./configure and it seems that maybe autoscan autoconf automake or similar is required for this repo
 # FIXME: We would prefer to always git clone the latest version. For now we use wget and download hamlib-3.0.1
-echoAndLog "Attempting to wget hamlib and make it to provide support for more types of PTT control..."
-if [ -d /ciniki/src/hamlib-3.0.1 ]
-then
-    echoAndLog "OK: It looks like we have downloaded hamlib from sourceforge.net into /ciniki/src/hamlib-3.0.1"
-else
-    echoAndLog "* wget /ciniki/src/hamlib-latest.tar.gz"
-    wget -O /ciniki/src/hamlib-latest.tar.gz "https://downloads.sourceforge.net/project/hamlib/hamlib/3.0.1/hamlib-3.0.1.tar.gz?r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Fhamlib%2F%3Fsource%3Dtyp_redirect&ts=1514591482&use_mirror=svwh" | tee -a /ciniki/logs/qruqsp_setup.txt
-    echoAndLog "* tar xzf /ciniki/src/hamlib-latest.tar.gz"
-    (cd /ciniki/src && tar xzf /ciniki/src/hamlib-latest.tar.gz) | tee -a /ciniki/logs/qruqsp_setup.txt
-fi
-
-if [ -f /usr/local/lib/libhamlib.so ]
-then
-    echoAndLog "OK: It looks like hamlib has already been compiled and installed to suppport more types of PTT control..."
-else
-    echoAndLog "* Attempting to configure hamlib for more types of PTT control..."
-    (cd /ciniki/src/hamlib-3.0.1 && ./configure) | tee -a /ciniki/logs/qruqsp_setup.txt
-    echoAndLog "* Attempting to make hamlib for more types of PTT control..."
-    make -C /ciniki/src/hamlib-3.0.1 | tee -a /ciniki/logs/qruqsp_setup.txt
-    echoAndLog "* Attempting to make check hamlib for more types of PTT control..."
-    make -C /ciniki/src/hamlib-3.0.1 check | tee -a /ciniki/logs/qruqsp_setup.txt
-    echoAndLog "* Attempting to make install hamlib for more types of PTT control..."
-    make -C /ciniki/src/hamlib-3.0.1 install | tee -a /ciniki/logs/qruqsp_setup.txt
-fi
-
-echoAndLog "Check for files that should have been created by the make of hamlib..."
-# You should now have many new files including:
-checkFiles /usr/local/include/hamlib/rig.h /usr/local/lib/libhamlib.so
-
-if [ -f /usr/local/bin/direwolf ]
-then
-    echoAndLog "OK: It looks like direwolf had already been compiled and installed..."
-else
-    # When building direwolf, the compiler and linker know enough to search /usr/local/include/... and /usr/local/lib/... but when it comes time to run direwolf, you might see a message like this:
-    # direwolf: error while loading shared libraries: libhamlib.so.2: cannot open shared object file: No such file or directory
-    # Edit your ~/.bashrc file and add this after the initial comment lines, and before the part that tests for running interactively.
-    export LD_LIBRARY_PATH=/usr/local/lib
-    # Type this so it will take effect now, instead of waiting for next login:
-    #    source ~/.bashrc
-    # Edit direwolf/Makefile.linux and look for this section:
-    # Uncomment following lines to enable hamlib support. 
-    #CFLAGS += -DUSE_HAMLIB
-    #LDFLAGS += -lhamlib
-    perl -pi -e 's/#CFLAGS/CFLAGS/g; s/#LDFLAGS/LDFLAGS/g' /ciniki/src/direwolf/Makefile.linux
-    egrep -i 'hamlib' /ciniki/src/direwolf/Makefile.linux | tee -a /ciniki/logs/qruqsp_setup.txt
-
-    # Compile an install the Direwolf application.
-    # cd ~/direwolf
-    make -C /ciniki/src/direwolf | tee -a /ciniki/logs/qruqsp_setup.txt
-    make -C /ciniki/src/direwolf install | tee -a /ciniki/logs/qruqsp_setup.txt
-
-    # NOTE The above 'sudo make install' outputs the following but don't do it yet.
-    # If this is your first install, not an upgrade, type this to put a copy
-    # of the sample configuration file (direwolf.conf) in your home directory:
-    # make install-conf
-    # This gets done a little later after verification of a few required files
-
-    make -C /ciniki/src/direwolf install-rpi
-
-    # OUTPUT from make install-rpi
-    # cp dw-start.sh ~
-    # ln -f -s /usr/share/applications/direwolf.desktop ~/Desktop/direwolf.desktop
-fi
-
-echoAndLog "You should now have files, and more, in these locations, under /usr/local, owned by root."
-echoAndLog "Check for files that should have been created by the make of direwolf..."
-checkFiles /usr/local/bin/direwolf /usr/local/bin/decode_aprs /usr/local/bin/tt2text /usr/local/bin/text2tt /usr/local/bin/ll2utm /usr/local/bin/utm2ll /usr/local/bin/log2gpx /usr/local/bin/gen_packets /usr/local/share/applications/direwolf.desktop /usr/local/share/direwolf/tocalls.txt /usr/local/share/direwolf/symbolsX.txt /usr/local/share/direwolf/symbols-new.txt /usr/local/share/direwolf/pixmaps/dw-icon.png /usr/local/share/applications/direwolf.desktop 
-    # FIXME: the following files seem to be expected but missing. Do we really need these?
-    # /home/pi/Desktop/direwolf.desktop /home/pi/dw-start.sh /home/pi/dw-start.sh /home/pi/direwolf.conf /home/pi/direwolf.conf.keep 
-
-    # echoAndLog "Utility to interpret “raw” data you might find on http://aprs.fi or http://findu.com"
-    # ls -l /usr/local/bin/tt2text /usr/local/bin/text2tt /usr/local/bin/ll2utm /usr/local/bin/utm2ll /usr/local/bin/log2gpx /usr/local/bin/gen_packets
-    # echoAndLog "Utilities related to APRStt gateway, UTM coordinates, log file to GPX conversion, and test packet generation."
-    # ls -l /usr/share/applications/direwolf.desktop
-    # echoAndLog "Application definition with icon, command to execute, etc."
-    # ls -l /usr/share/direwolf/tocalls.txt
-    # echoAndLog "Mapping from destination address to system type. Search order for tocalls.txt is first the current working directory and then /usr/share/direwolf."
-    # ls -l /usr/share/direwolf/symbolsX.txt /usr/share/direwolf/symbols-new.txt
-    # echoAndLog "Descriptions and codes for APRS symbols."
-    # ls -l /usr/share/direwolf/dw-icon.png
-    # echoAndLog "Icon for the desktop."
-    # ls -l /usr/local/share/doc/direwolf/* /usr/local/man/man1/*
-    # echoAndLog "Various documentation."
-    # ls -l /usr/local/share/doc/direwolf/examples/*
-    # echoAndLog "Sample configuration and other examples."
-    # echoAndLog "You should also have these files, under /home/pi."
-    # ls -l /home/pi/Desktop/direwolf.desktop
-    # echoAndLog "Symbolic link to /usr/share/applications/direwolf.desktop. This causes an icon to be displayed on the desktop."
-    # ls -l /home/pi/dw-start.sh
-    # echoAndLog "Script to start Dire Wolf if it is not running already."
-    # ls -l  /home/pi/direwolf.conf
-
-#
-# Andrew removed following Apr 13, 2019. Direwolf.conf will now be standard conf as done below
-#
-#if [ -f /home/pi/direwolf.conf ]
-#then
-#    if [ "${1}X" == "initX" ]
-#    then
-#        echoAndLog "*** make install-conf. For now we will save your direwolf.conf"
-#        echoAndLog "Backup the direwolf.conf to direwolf.conf.backup_${datetime}"
-#        datetime=`date "+%Y-%m-%d_%H%M%S"`
-#        cp -p /home/pi/direwolf.conf /home/pi/direwolf.conf.backup_${datetime}
-#        ls -l /home/pi/direwolf.conf /home/pi/direwolf.conf.backup_${datetime} | tee -a /ciniki/logs/qruqsp_setup.txt
-#        make -C /ciniki/src/direwolf install-conf | tee -a /ciniki/logs/qruqsp_setup.txt
-#    else
-#        echoAndLog "*** WARNING: When upgrading from an earlier version, you will probably want to skip make install-conf because it will wipe out your earlier configuration file."
-#        echoAndLog "*** If this is your first time or you want to wipe out your earlier configuration file and start over then rerun this script with \"init\" as a command-line argument."
-#        echoAndLog "*** A reminder will be printed immediately before exit."
-#        TODO="*** TODO: If this is your first time or you want to wipe out your earlier configuration file and start over then rerun this script with \"init\" as a command-line argument as follows: sudo $0 init"
-#    fi
-#else
-#    echoAndLog "We assume that this is the first time installing Dire Wolf and performing this step and /home/pi/direwolf.conf.keep can be used to restore the old version."
-#    sudo -u pi make -C /ciniki/src/direwolf install-conf | tee -a /ciniki/logs/qruqsp_setup.txt
-#fi
-#
-#echoAndLog "This step should have copied the initial configuration file to the home directory, /home/pidirewolf.conf. This is the initial configuration file."
-#ls -l /home/pi/direwolf.conf | tee -a /ciniki/logs/qruqsp_setup.txt
-#echoAndLog "Configuration file.  Search order is current working directory then the user’s home directory."
-#echoAndLog "Go to your home directory and try to run direwolf."
-#echoAndLog "cd ~ "
-#echoAndLog "direwolf"
-#echoAndLog "NOTE: You should see something like the following examples, because we have not yet configured it for using an audio device."
-#echoAndLog "  EXAMPLE: Dire Wolf version ..."
-#echoAndLog "  EXAMPLE: Audio device for both receive and transmit: default (channel 0)"
-#echoAndLog "  EXAMPLE: Could not open audio device default for input"
-#echoAndLog "  EXAMPLE: No such file or directory"
-#echoAndLog "  EXAMPLE: Pointless to continue without audio device."
-#sudo -u pi /usr/local/bin/direwolf | tee -a /ciniki/logs/qruqsp_setup.txt
-#echoAndLog "We will perform the necessary configuration in a later step."
-# tput init resets the silly ANSI color scheme that is set by direwolf
-#tput init
-
-#
-# direwolf is now configured in the UI, and conf files are generated
-# when listener is started
-#
-#if [ -f /ciniki/sites/qruqsp.local/direwolf.conf ]
-#then
-#    echo " " > /ciniki/sites/qruqsp.local/direwolf.conf
-#    echo "ADEVICE plughw:1,0" > /ciniki/sites/qruqsp.local/direwolf.conf
-#    echo "ACHANNELS 1" > /ciniki/sites/qruqsp.local/direwolf.conf
-#    echo "CHANNEL 0" > /ciniki/sites/qruqsp.local/direwolf.conf
-#    echo "MYCALL QRUQSP" > /ciniki/sites/qruqsp.local/direwolf.conf
-#    echo "MODEM 1200" > /ciniki/sites/qruqsp.local/direwolf.conf
-#    echo "PTT GPIO 23" > /ciniki/sites/qruqsp.local/direwolf.conf
-#    echo "DWAIT 0" > /ciniki/sites/qruqsp.local/direwolf.conf
-#    echo "TXDELAY 10" > /ciniki/sites/qruqsp.local/direwolf.conf
-#    echo "TXTAIL 10" > /ciniki/sites/qruqsp.local/direwolf.conf
-#fi
 
 echoAndLog "This completes the instructions from Raspberry-Pi-APRS.pdf which are required at this time."
 echoAndLog "We can stop at the section called Interface for Radio. Here we are using the SDR dongle rather than a USB audio adapter."
@@ -593,41 +415,6 @@ apt-get -y install cmake build-essential libusb-1.0-0-dev | tee -a /ciniki/logs/
 echoAndLog "Make sure gpsd is installed"
 apt-get -y install gpsd
 
-#
-# Install rtl-sdr software
-#
-if [ -d /ciniki/src/rtl-sdr/cmake ]
-then
-    echoAndLog "OK: It appears that we already did git clone rtl-sdr"
-else
-    echoAndLog "* Attempting to git clone rtl-sdr"
-    git clone git://git.osmocom.org/rtl-sdr.git /ciniki/src/rtl-sdr | tee -a /ciniki/logs/qruqsp_setup.txt
-fi
-
-if [ -d /ciniki/src/rtl-sdr/build ]
-then
-    echoAndLog "OK: It appears that we already did a build of rtl-sdr"
-else
-    mkdir /ciniki/src/rtl-sdr/build
-    (cd /ciniki/src/rtl-sdr/build && cmake ../ -DINSTALL_UDEV_RULES=ON -DDETACH_KERNEL_DRIVER=ON) | tee -a /ciniki/logs/qruqsp_setup.txt
-    make -C /ciniki/src/rtl-sdr/build | tee -a /ciniki/logs/qruqsp_setup.txt
-    make -C /ciniki/src/rtl-sdr/build install | tee -a /ciniki/logs/qruqsp_setup.txt
-    (cd /ciniki/src/rtl-sdr/build && ldconfig) | tee -a /ciniki/logs/qruqsp_setup.txt
-fi
-
-
-# git clone rtl_433
-if [ -d /ciniki/src/rtl_433/build ]
-then
-    echoAndLog "OK: It appears that we already did a build of rtl_433"
-else
-    git clone https://github.com/merbanan/rtl_433 /ciniki/src/rtl_433 | tee -a /ciniki/logs/qruqsp_setup.txt
-    mkdir -p /ciniki/src/rtl_433/build
-    (cd /ciniki/src/rtl_433/build && cmake ../) | tee -a /ciniki/logs/qruqsp_setup.txt
-    make -C /ciniki/src/rtl_433/build | tee -a /ciniki/logs/qruqsp_setup.txt
-    make -C /ciniki/src/rtl_433/build install | tee -a /ciniki/logs/qruqsp_setup.txt
-#    (cd /ciniki/src/rtl_433/build && ldconfig) | tee -a /ciniki/logs/qruqsp_setup.txt
-fi
 
 # Optional support for gpsd
 # This is covered in the separate document, Raspberry-Pi-APRS-Tracker.pdf.
@@ -673,12 +460,11 @@ fi
 echoAndLog "Chown pi:pi /home/pi/.my.cnf and chmod 700 /home/pi/.my.cnf just in case it is not set correctly"
 chown pi:pi /home/pi/.my.cnf | tee -a /ciniki/logs/qruqsp_setup.txt
 chmod 700 /home/pi/.my.cnf | tee -a /ciniki/logs/qruqsp_setup.txt
-echoAndLog "FIXME: It seems that Raspbian stretch switched from mysql to MariaDB and /home/pi/.my.cnf no longer works as it did with mysql. We wil have to run mysql commands as root nutil we figure this out."
-# check that innodb_* and sql_mode settings have been added to /etc/mysql/mariadb.conf.d/50-server.cnf
+# check that innodb_* and sql_mode settings have been added to /etc/mysql/mariadb.conf.d/51-ciniki.cnf
 innodbOptions=`egrep -c 'default-character-set = latin1|innodb_file_per_table = 1|character-set-server = latin1|collation-server = latin1_general_ci|default-character-set = latin1' /etc/mysql/mariadb.conf.d/51-ciniki.cnf`
-if [ "${innodbOptions}X" == "4X" ]
+if [ "${innodbOptions}X" == "5X" ]
 then
-    echoAndLog "OK: /etc/mysql/mariadb.conf.d/51-ciniki.cnf contains ${innodbOptions} of 8 of the innodb_* and sql_mode settings that are required."
+    echoAndLog "OK: /etc/mysql/mariadb.conf.d/51-ciniki.cnf contains ${innodbOptions} of 5 of the innodb_* and sql_mode settings that are required."
 else
     echoAndLog "*** UNEXPECTED: /etc/mysql/mariadb.conf.d/51-ciniki.cnf CONTAINS ONLY ${innodbOptions} of 8 of the innodb_* and sql_mode settings that are required."
     TODO="${TODO}\n *** UNEXPECTED: /etc/mysql/mariadb.conf.d/51-ciniki.cnf CONTAINS ONLY ${innodbOptions} of 8 of the innodb_* and sql_mode settings that are required."
