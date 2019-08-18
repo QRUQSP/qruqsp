@@ -585,6 +585,7 @@ sudo -u pi wget -nd -P /ciniki/sites/qruqsp.local/site/ciniki-picode -m https://
 # unzip the files, rerun every time to get the latest code
 #
 sudo -u pi ls /ciniki/sites/qruqsp.local/site/ciniki-picode/*.zip |sed 's/^\(.*\)\/\([[:alnum:]]\+\).\([[:alnum:]]\+\).zip/unzip -o -d \/ciniki\/sites\/qruqsp.local\/site\/\2-mods\/\3 \1\/\2.\3.zip/' | sh
+chown -R pi:pi /ciniki/sites/qruqsp.local/site
 
 #
 # Copy the pi-installer.php file (Now included in piadmin module)
@@ -848,40 +849,41 @@ apt-get -y install i2c-tools python-smbus
 # The dtparam=i2c_arm=on should be commented out. The i2c is setup
 # in on alternate gpio pins to allow for push button shutdown/startup.
 #
-DTOVERLAYI2CARM=`awk '/^dtparam.*=.*i2c/' /boot/config.txt`
-if [ "${DTOVERLAYI2CARM}X" != "X" ]
-then 
-    echoAndLog "WARNING: ${DTOVERLAYI2CARM} enabled in /boot/config.txt"
-else
-    echoAndLog "* OK: dtparam=i2c_arm=on not enabled in /boot/config.txt"
-fi
+#DTOVERLAYI2CARM=`awk '/^#dtparam.*=.*i2c/' /boot/config.txt`
+#if [ "${DTOVERLAYI2CARM}X" != "X" ]
+#then 
+#    echoAndLog "Enabling i2c in /boot/config.txt"
+#    sed -i 's/^#dtparam=i2c_arm/dtparam=i2c_arm/' /boot/config.txt
+#else
+#    echoAndLog "* OK: dtparam=i2c_arm=on enabled in /boot/config.txt"
+#fi
 
 #
 # Check for i2c enabled on alternate gpio pins. GPIO3 needs to
 # be left alone so it can be used for clean shutdown and restart. 
 #
-DTOVERLAYI2C=`awk '/^dtoverlay.*=.*i2c-gpio/' /boot/config.txt`
+#DTOVERLAYI2C=`awk '/^dtoverlay.*=.*i2c-gpio/' /boot/config.txt`
 
-if [ "${DTOVERLAYI2C}X" == "X" ]
-then
-    echo "dtoverlay=i2c-gpio,i2c_gpio_sda=17,i2c_gpio_scl=27" >> /boot/config.txt
-    echoAndLog "* Added: dtoverlay=i2c-gpio in /boot/config.txt"
-else
-    echoAndLog "* OK: ${DTOVERLAYI2C} in /boot/config.txt"
-fi
+#if [ "${DTOVERLAYI2C}X" == "X" ]
+#then
+#    echo "dtoverlay=i2c-gpio,i2c_gpio_sda=17,i2c_gpio_scl=27" >> /boot/config.txt
+#    echoAndLog "* Added: dtoverlay=i2c-gpio in /boot/config.txt"
+#else
+#    echoAndLog "* OK: ${DTOVERLAYI2C} in /boot/config.txt"
+#fi
 
 #
 # Check to make sure GPIO3 is setup to clean shutdown pi
 #
-DTOVERLAYSHUTDOWN=`awk '/^dtoverlay.*=.*gpio-shutdown/' /boot/config.txt`
-
-if [ "${DTOVERLAYSHUTDOWN}X" == "X" ]
-then
-    echo "dtoverlay=gpio-shutdown,gpio_pin=3" >> /boot/config.txt
-    echoAndLog "* Added: dtoverlay=gpio-shutdown in /boot/config.txt"
-else
-    echoAndLog "* OK: ${DTOVERLAYSHUTDOWN} in /boot/config.txt"
-fi
+#DTOVERLAYSHUTDOWN=`awk '/^dtoverlay.*=.*gpio-shutdown/' /boot/config.txt`
+#
+#if [ "${DTOVERLAYSHUTDOWN}X" == "X" ]
+#then
+#    echo "dtoverlay=gpio-shutdown,gpio_pin=3" >> /boot/config.txt
+#    echoAndLog "* Added: dtoverlay=gpio-shutdown in /boot/config.txt"
+#else
+#    echoAndLog "* OK: ${DTOVERLAYSHUTDOWN} in /boot/config.txt"
+#fi
 
 # Print any to do items here if we loaded them into this TODO variable earlier in the script. This is the last thing we want the user to see before END.
 TODOS=`echo ${TODO} | grep -c TODO`
