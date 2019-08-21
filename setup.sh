@@ -557,6 +557,7 @@ fi
 #
 if [[ ${PREPARE_ONLY} -eq 1 ]]; then
     echo "qruqsp" >/etc/hostname
+    hostname qruqsp
     echo "Etc/UTC" >/etc/timezone
 fi
 
@@ -706,7 +707,9 @@ fi
 # If in prepare mode, setup redirect
 #
 if [[ ${PREPARE_ONLY} -eq 1 ]]; then
-    rm /var/www/html/index.html
+    if [ -f /var/www/html/index.html ]; then
+        rm /var/www/html/index.html
+    fi
     echo "<?php Header(\"Location: http://{\$_SERVER['HTTP_HOST']}:8080/\",301); exit;?>" > /var/www/html/index.php
 fi
 
@@ -728,7 +731,9 @@ if [[ ${PREPARE_ONLY} -eq 0 ]]; then
     php /ciniki/sites/qruqsp.local/site/qruqsp-install.php ${DBENG} -dh ${database_host} -du ${database_username} -dp ${admin_password} -dn ${database_name} -ae ${admin_email} -au ${admin_username} -ap ${qruqsp_password} -mn ${master_name} -un {server_name} | tee -a /ciniki/logs/qruqsp_setup.txt
 else
     echoAndLog "OK: Linking index to pi-install.php"
-    sudo -u pi ln -s /ciniki/sites/qruqsp.local/site/qruqsp-mods/piadmin/scripts/pi-install.php /ciniki/sites/qruqsp.local/site/index.php
+    if [ ! -f /ciniki/sites/qruqsp.local/site/index.php ]; then
+        sudo -u pi ln -s /ciniki/sites/qruqsp.local/site/qruqsp-mods/piadmin/scripts/pi-install.php /ciniki/sites/qruqsp.local/site/index.php
+    fi
 fi
 
 # if I need to rerun:
