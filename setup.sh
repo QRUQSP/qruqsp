@@ -653,6 +653,18 @@ else
     echo "IncludeOptional /ciniki/apache-sites-enabled/*.conf" >> /etc/apache2/apache2.conf
 fi
 
+# Check if a Mutex has been defined in the apache2.conf. It has a bug in buster
+# and needs to be set with Mutex flock
+MUINC=`egrep -c "^Mutex " /etc/apache2/apache2.conf`
+if [ "${APINC}X" == "0X" ]
+then
+    echoAndLog "*Add: Mutex flock to /etc/apache2/apache2.conf"
+    sed -i 's/^\(#Mutex.*\)$/\1\nMutex flock/m' /etc/apache2/apache2.conf
+else
+    echoAndLog "OK: /etc/apache2/apache2.conf already includes: Mutex flock"
+fi
+
+
 # FIXED: THis should be a2enmod rewrite instead of creating the link
 #    echoAndLog "Link /etc/apache2/sites-enabled/qruqsp.local.conf and /etc/apache2/mods-enabled/rewrite.load"
 #    ln -s /etc/apache2/sites-available/qruqsp.local.conf /etc/apache2/sites-enabled/qruqsp.local.conf
