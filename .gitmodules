@@ -106,3 +106,6 @@
 [submodule "site/qruqsp-mods/pibin"]
 	path = site/qruqsp-mods/pibin
 	url = https://github.com/QRUQSP/pibin
+[submodule "site/ciniki-mods/taxes"]
+	path = site/ciniki-mods/taxes
+	url = https://github.com/ciniki/taxes
