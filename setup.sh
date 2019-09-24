@@ -558,7 +558,9 @@ fi
 if [[ ${PREPARE_ONLY} -eq 1 ]]; then
     echo "qruqsp" >/etc/hostname
     hostname qruqsp
+    rm /etc/localtime
     echo "Etc/UTC" >/etc/timezone
+    dpkg-reconfigure -f noninteractive tzdata
 fi
 
 #
