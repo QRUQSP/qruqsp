@@ -1,6 +1,6 @@
 Welcome
 -------
-The Super Repo for the QRUQSP project. For more information on this product, please go to https://qruqsp.org/
+The Super Repo for the QRUQSP project. For more information on this project, please go to https://qruqsp.org/
 
 
 Installation
