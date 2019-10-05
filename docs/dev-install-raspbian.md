@@ -1,5 +1,5 @@
-Development Install for Raspbian
-================================
+Install QRUQSP on Raspbian
+==========================
 
 To install QRUQSP on Raspbian, you will need to know how to use the command line.
 
