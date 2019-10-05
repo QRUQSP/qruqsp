@@ -1,6 +1,8 @@
 Development Install for Ubuntu
 ==============================
 
+**NOTE** This file has been superceeded by [Raspbian](dev-install-raspbian.md).
+
 Packages required
 -----------------
 

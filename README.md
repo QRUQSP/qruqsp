@@ -1,13 +1,13 @@
 Welcome
-------
-The Super Repo for the QRUQSP project. This project is a package built on top of [Ciniki Multitenant Platform](http://ciniki.org/)
+-------
+The Super Repo for the QRUQSP project. For more information on this product, please go to https://qruqsp.org/
 
 
 Installation
 ------------
 
-FIXME: Need to fill out the installation instructions
-
+We are currently working on our installation instructions. Until then, if you would like to try 
+QRUQSP on your own system, please contact us at https://qruqsp.org/contact
 
 Developers
 ----------

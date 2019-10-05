@@ -7,8 +7,13 @@ If you are interested in helping with the QRUQSP project, this document should h
 Installing
 ----------
 
+- [Installing on Raspbian](dev-install-raspbian.md)
+
+Older install files for other operating system. These may be out of date, please
+let us know if you have any problems.
+
 - [Installing on a mac](dev-install-mac.md)
-- FIXME: Add documentation for docker setup
+- [Installing on Ubuntu](dev-install-ubuntu.md)
 
 Other Documents
 ---------------
