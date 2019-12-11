@@ -754,8 +754,8 @@ fi
 # mysqladmin drop qruqsp
 # rm -rf /ciniki/sites/qruqsp.local
 
-CINIKICRONS=`crontab -l | egrep -c "/ciniki/sites/qruqsp.local/site/ciniki-mods/cron/scripts/cron.php"`
-if [ "${CINIKICRONS}X" == "3X" ]
+CINIKICRONS=`crontab -l | egrep -c "/ciniki/sites/qruqsp.local/site/"`
+if [ "${CINIKICRONS}X" == "6X" ]
 then
     echoAndLog "OK: root crontab already includes ${CINIKICRONS} ciniki cron.php entries"
 else
@@ -825,7 +825,7 @@ if [[ ${PREPARE_ONLY} -eq 1 ]]; then
     fi
 
     # Check for /etc/dhcpcd.conf setup
-    DHCPWLAN=`egrep -c "^[^#]*interface wlan0=" /etc/dhcpcd.conf`;
+    DHCPWLAN=`egrep -c "^[^#]*interface wlan0" /etc/dhcpcd.conf`;
     if [ "${DHCPWLAN}X" == "0X" ]
     then
         echoAndLog "Setup /etc/dhcpcd.conf file"
