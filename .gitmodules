@@ -109,3 +109,6 @@
 [submodule "site/ciniki-mods/taxes"]
 	path = site/ciniki-mods/taxes
 	url = https://github.com/ciniki/taxes
+[submodule "site/qruqsp-mods/ntst"]
+	path = site/qruqsp-mods/ntst
+	url = https://github.com/qruqsp/ntst
