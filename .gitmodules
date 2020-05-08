@@ -112,3 +112,6 @@
 [submodule "site/qruqsp-mods/ntst"]
 	path = site/qruqsp-mods/ntst
 	url = https://github.com/qruqsp/ntst
+[submodule "site/qruqsp-mods/fielddaylog"]
+	path = site/qruqsp-mods/fielddaylog
+	url = https://github.com/qruqsp/fielddaylog
