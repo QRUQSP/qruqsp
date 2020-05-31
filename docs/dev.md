@@ -12,7 +12,6 @@ Installing
 Older install files for other operating system. These may be out of date, please
 let us know if you have any problems.
 
-- [Installing on a mac](dev-install-mac.md)
 - [Installing on Ubuntu](dev-install-ubuntu.md)
 
 Other Documents
