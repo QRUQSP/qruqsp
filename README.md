@@ -5,7 +5,6 @@ The Super Repo for the QRUQSP project. For more information on this project, ple
 
 Installation
 ------------
-
-We are currently in a closed beta. If you are interested in trying QRUQSP, please contact us at https://qruqsp.org/contact 
+We are currently in beta. If you are interested in trying QRUQSP, you can find install instructions at [/docs]
 
 
