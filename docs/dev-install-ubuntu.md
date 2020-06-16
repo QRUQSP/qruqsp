@@ -133,22 +133,3 @@ If you don't want to setup SSL on your dev machine, turn off SSL in the qruqsp-a
     ssl = "off"
     ...snip...
 ```
-
-Install QRUQSP/dev-tools
-------------------------
-The dev-tools packages contains useful scripts to help you test and setup new modules.
-
-```
-cd /ciniki/sites/qruqsp.local
-git clone https://github.com/qruqsp/dev-tools.git
-```
-
-Copy the run.ini.default to run.ini and configure with your local settings. This will allow you to 
-execute ./run.php and see the history of API calls and repeat any calls you want, useful for testing the API.
-
-```
-cd /ciniki/sites/qruqsp.local
-cp run.ini.default run.ini
-```
-
-
