@@ -118,3 +118,6 @@
 [submodule "site/qruqsp-mods/canadadaylog"]
 	path = site/qruqsp-mods/canadadaylog
 	url = https://github.com/QRUQSP/canadadaylog
+[submodule "site/qruqsp-mods/13colonieslog"]
+	path = site/qruqsp-mods/13colonieslog
+	url = https://github.com/QRUQSP/13colonieslog
