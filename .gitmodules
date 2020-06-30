@@ -115,3 +115,6 @@
 [submodule "site/qruqsp-mods/fielddaylog"]
 	path = site/qruqsp-mods/fielddaylog
 	url = https://github.com/qruqsp/fielddaylog
+[submodule "site/qruqsp-mods/canadadaylog"]
+	path = site/qruqsp-mods/canadadaylog
+	url = https://github.com/QRUQSP/canadadaylog
