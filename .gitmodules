@@ -124,3 +124,6 @@
 [submodule "site/qruqsp-mods/contestlogger"]
 	path = site/qruqsp-mods/contestlogger
 	url = https://github.com/QRUQSP/contestlogger
+[submodule "site/qruqsp-mods/winterfielddaylog"]
+	path = site/qruqsp-mods/winterfielddaylog
+	url = https://github.com/QRUQSP/winterfielddaylog
