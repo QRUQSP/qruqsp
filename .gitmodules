@@ -127,3 +127,6 @@
 [submodule "site/qruqsp-mods/winterfielddaylog"]
 	path = site/qruqsp-mods/winterfielddaylog
 	url = https://github.com/QRUQSP/winterfielddaylog
+[submodule "site/qruqsp-mods/ontarioqp"]
+	path = site/qruqsp-mods/ontarioqp
+	url = https://github.com/qruqsp/ontarioqp
