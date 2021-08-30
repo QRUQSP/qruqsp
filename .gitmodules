@@ -121,3 +121,12 @@
 [submodule "site/qruqsp-mods/13colonieslog"]
 	path = site/qruqsp-mods/13colonieslog
 	url = https://github.com/QRUQSP/13colonieslog
+[submodule "site/qruqsp-mods/contestlogger"]
+	path = site/qruqsp-mods/contestlogger
+	url = https://github.com/QRUQSP/contestlogger
+[submodule "site/qruqsp-mods/winterfielddaylog"]
+	path = site/qruqsp-mods/winterfielddaylog
+	url = https://github.com/QRUQSP/winterfielddaylog
+[submodule "site/qruqsp-mods/ontarioqp"]
+	path = site/qruqsp-mods/ontarioqp
+	url = https://github.com/qruqsp/ontarioqp
